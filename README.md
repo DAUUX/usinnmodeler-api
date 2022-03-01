@@ -4,9 +4,11 @@ API for the USINN Modeler platform
 
 ## Requirements
 
-For development, you will only need Node.js installed in your environment.
+For development, you will need Node.js and MySQL installed in your environment.
 
 ## Install
+
+Create a database called "usinnmodeler" and import the file "usinnmodeler_bd.sql" into it. After that, run the commands:
 
     $ git clone https://github.com/DAUUX/usinnmodeler-api
     $ cd usinnmodeler-api
