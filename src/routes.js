@@ -19,4 +19,11 @@ routes.post("/signup",
     AuthController.signup.handler
 );
 
+routes.post("/signin",
+    [
+        AuthController.signin.validations
+    ],
+    AuthController.signin.handler
+);
+
 module.exports = routes;
