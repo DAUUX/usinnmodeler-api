@@ -62,13 +62,13 @@ module.exports = {
                 });
 
                 if (!user)
-                    return res.status(404).json({ errors: { msg: "Usuário não encontrado"} });
+                    return res.status(404).json({ errors: [{ msg: "Usuário não encontrado"}] });
 
                 // check credentials
                 let passwordIsValid = bcrypt.compareSync(password, user.password);
 
                 if (!passwordIsValid)
-                    return res.status(401).json({ errors: { msg: "Credenciais inválidas" } });
+                    return res.status(401).json({ errors: [{ msg: "Credenciais inválidas" }] });
 
                 // creating access token
                 let token = jwt.sign({ id: user.id }, auth.secret, {
