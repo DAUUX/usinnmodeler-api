@@ -1,9 +1,11 @@
+require('dotenv').config()
+
 module.exports = {
     dialect: 'mysql',
-    host: 'localhost',
-    database: 'usinnmodeler',
-    username: 'root',
-    password: '',
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
     dialectOptions: {
         dateStrings: true,
         typeCast: function (field, next) { // ler do banco datetime em string
