@@ -1,0 +1,23 @@
+services:
+  api:
+    container_name: usinnmodeler-api
+    image: node:16.4.2-alpine
+    user: node
+    working_dir: /home/app
+    ports:
+    - "127.0.0.1:8080:8080"
+    volumes:
+    - .:/home/app
+    command: npm start
+  db:
+    image: mariadb:10.4.14
+    container_name: "${DB_HOST}"
+    ports:
+        - "127.0.0.1:3306:${DB_PORT}"
+    environment:
+        MYSQL_ROOT_PASSWORD: ''
+        MYSQL_ROOT_HOST: "%"
+        MYSQL_DATABASE: '${DB_NAME}'
+        MYSQL_USER: '${DB_USERNAME}'
+        MYSQL_PASSWORD: '${DB_PASSWORD}'
+        MYSQL_ALLOW_EMPTY_PASSWORD: 1
