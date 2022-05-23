@@ -21,3 +21,8 @@ tasks:
       DB_PASSWORD: ""
     init: gp sync-await importdb && npm install
     command: npm run start
+    
+ports:
+  - port: 8080
+    onOpen: open-browser
+    visibility: public
