@@ -6,7 +6,20 @@ image:
   file: .gitpod.dockerfile
 
 tasks:
-  - init: npm install
+  - name: "frontend"
+    env:
+      PORT: "8080"
+      API_KEY: "IEL5hx7JfsARUmZERRkWTqqxLK4SDzwM38HbwElQxmjIO9NhQy3lfjYruSAzHwBB"
+      DB_PORT: "3306"
+      DB_HOST: "localhost"
+      DB_NAME: "usinnmodeler"
+      DB_USERNAME: "root"
+      DB_PASSWORD: ""
+    init: npm install
     command: npm run start
-
+  - name: "start db"
+    before: mysql -u root -p
+    init: CREATE DATABASE usinnmodeler;
+  - name: "import db"
+    init: mysql -u root -p usinnmodeler < usinnmodeler_bd.sql
 
