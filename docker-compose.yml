@@ -8,7 +8,7 @@ services:
     - "127.0.0.1:8080:8080"
     volumes:
     - .:/home/app
-    command: npm start
+    command: [sh, "-c", "npm install && npm start"]
   db:
     image: mariadb:10.4.14
     container_name: "${DB_HOST}"

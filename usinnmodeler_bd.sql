@@ -16,7 +16,21 @@ CREATE TABLE `diagram` (
   PRIMARY KEY (`id`),
   KEY `FK_user_id` (`user_id`),
   CONSTRAINT `FK_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS sharing;
+CREATE TABLE `sharing` (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `collaborator_id` int(11) NOT NULL,
+  `diagram_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL COMMENT 'Create Time',
+  `updated_at` datetime DEFAULT NULL COMMENT 'Update Time',
+  PRIMARY KEY (`id`),
+  KEY `FK_collaborator_id` (`collaborator_id`),
+  KEY `FK_diagram_id` (`diagram_id`),
+  CONSTRAINT `FK_collaborator_id` FOREIGN KEY (`collaborator_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `FK_diagram_id` FOREIGN KEY (`diagram_id`) REFERENCES `diagram` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS user;
 CREATE TABLE `user` (
@@ -30,4 +44,4 @@ CREATE TABLE `user` (
   `updated_at` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;

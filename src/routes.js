@@ -4,6 +4,7 @@ const { verifySignUp, authJwt } = require("./middleware");
 const AuthController = require("./controllers/AuthenticationController");
 const UserController = require("./controllers/UserController");
 const DiagramController = require("./controllers/DiagramController");
+const SharingController = require('./controllers/SharingController');
 
 routes.use(function (req, res, next) {
     res.header(
@@ -34,5 +35,13 @@ diagramRoutes.post("/", DiagramController.create.handler);
 diagramRoutes.put("/:id", DiagramController.update.handler);
 diagramRoutes.delete("/:id", DiagramController.delete.handler);
 routes.use('/diagrams', diagramRoutes); 
+
+// Rotas de compartilhamento
+const sharingRoutes = express.Router();
+sharingRoutes.use([authJwt.verifyToken]);
+sharingRoutes.get("/:id", SharingController.getAll.handler);
+sharingRoutes.post("/:id", SharingController.create.handler);
+sharingRoutes.delete("/:diagram_id/:id", SharingController.delete.handler);
+routes.use('/sharing', sharingRoutes); 
 
 module.exports = routes;
