@@ -22,7 +22,7 @@ verifyToken = (req, res, next) => {
                 res.status(401).json({errors: [{msg: "Usuário inexistente!"}]}); 
                 return;
             }
-            req.userId = decoded.id;
+            req.user_id = decoded.id;
             next();
         })
 

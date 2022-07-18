@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize');
+const { Model, DataTypes, Op } = require('sequelize');
 
 class Diagram extends Model {
 
@@ -24,6 +24,10 @@ class Diagram extends Model {
             diagram_data: {
                 type: DataTypes.STRING,
                 allowNull: true,
+            },
+            is_shared: {
+                type: DataTypes.STRING,
+                allowNull: true,
             }
         }, {
             scopes: {
@@ -31,17 +35,28 @@ class Diagram extends Model {
                     return {
                         where: {user_id}
                     }
+                },
+                byOwnerOrCollaborator(user_id, collaboration) {
+                    return {
+                        where: {
+                            [Op.or]: [{user_id}, {'$collaboration.collaborator_id$': user_id}]
+                        },
+                        include: [
+                            {model: collaboration, as: 'collaboration'}
+                        ]
+                    }
                 }
             },
             sequelize: connection,
             tableName: 'diagram',
-            // paranoid: true
+            paranoid: true
         })
         return Diagram;
     }
 
 	static associate(models) {
 		this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user'});
+		this.hasMany(models.Collaboration, { foreignKey: 'diagram_id', as: 'collaboration'});
 	}
 
 }
