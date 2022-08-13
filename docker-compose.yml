@@ -8,16 +8,23 @@ services:
     - "127.0.0.1:8080:8080"
     volumes:
     - .:/home/app
-    command: npm start
+    depends_on:
+      db:
+        condition: service_healthy
+    command: [sh, "-c", "npm install && npx sequelize-cli db:migrate && npm start"]
   db:
     image: mariadb:10.4.14
     container_name: "${DB_HOST}"
     ports:
-        - "127.0.0.1:3306:${DB_PORT}"
+      - "127.0.0.1:3306:${DB_PORT}"
     environment:
-        MYSQL_ROOT_PASSWORD: ''
-        MYSQL_ROOT_HOST: "%"
-        MYSQL_DATABASE: '${DB_NAME}'
-        MYSQL_USER: '${DB_USERNAME}'
-        MYSQL_PASSWORD: '${DB_PASSWORD}'
-        MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: '${DB_NAME}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10

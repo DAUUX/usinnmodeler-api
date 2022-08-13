@@ -10,7 +10,7 @@ module.exports = {
 
             try {
     
-                const id = req.userId;
+                const id = req.user_id;
     
                 const user = await User.findOne({
                     where: {id},
@@ -50,7 +50,7 @@ module.exports = {
                 if (!errors.isEmpty()) 
                     throw {name: 'RequestValidationError', errors};
 
-                const id = req.userId;
+                const id = req.user_id;
 
                 const { name, email, password, company, role } = req.body;
 
@@ -78,7 +78,7 @@ module.exports = {
     
             try {
     
-                const id = req.userId;
+                const id = req.user_id;
     
                 await User.destroy({ where: {id} });
     
