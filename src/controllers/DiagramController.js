@@ -59,7 +59,6 @@ module.exports = {
                 return res.json({diagrams: diagrams});
     
             } catch (error) {
-                console.log(error);
                 if (error.name == 'RequestValidationError') {
                     return res.status(422).json({errors: error.errors.array()});
                 } else if (error.name == 'SequelizeValidationError') {
@@ -158,7 +157,6 @@ module.exports = {
                 return res.json(diagram);
 
             } catch (error) {
-                console.log(error);
                 if (error.name == 'RequestValidationError') {
                     return res.status(422).json({errors: error.errors.array()});
                 } else if (error.name == 'SequelizeValidationError') {
@@ -198,7 +196,6 @@ module.exports = {
                 } else if (error.name == 'SequelizeValidationError') {
                     return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
                 } else {
-                    console.log(error);
                     return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
                 }
             }

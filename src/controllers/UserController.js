@@ -66,7 +66,6 @@ module.exports = {
                 } else if (error.name == 'SequelizeValidationError') {
                     return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
                 } else {
-                    console.log(error);
                     return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
                 }
             }

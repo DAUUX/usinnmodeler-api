@@ -42,7 +42,7 @@ routes.use('/diagrams', diagramRoutes);
 const sharingRoutes = express.Router();
 sharingRoutes.use([authJwt.verifyToken]);
 sharingRoutes.post("/:diagram_id", SharingController.generateLink.handler);
-sharingRoutes.delete("/:diagram_id", SharingController.generateLink.handler);
+sharingRoutes.delete("/:diagram_id", SharingController.removeLink.handler);
 routes.use('/share', sharingRoutes); 
 
 // Rotas de colaboração

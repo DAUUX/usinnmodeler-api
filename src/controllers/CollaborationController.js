@@ -39,13 +39,17 @@ module.exports = {
 
                 let { diagram_id } = jwt.verify(token, auth.secret);
                 
-                const diagram_exists = await Diagram.findByPk(diagram_id);
-                if (!diagram_exists)
+                const diagram = await Diagram.findByPk(diagram_id);
+                if (!diagram)
                     return res.status(422).json({errors: [{msg: "Diagrama não existe"}]});
 
-                const collaborator = await Collaboration.findOrCreate({where: { diagram_id, collaborator_id }, defaults: { diagram_id, collaborator_id}});
+                const owned_diagram = await Diagram.scope({ method: ['byUser', collaborator_id] }).findByPk(diagram_id);
+                if (owned_diagram)
+                    return res.json(owned_diagram);
 
-                return res.json(collaborator[0]);
+                let collaborator = await Collaboration.findOrCreate({where: { diagram_id, collaborator_id }, defaults: { diagram_id, collaborator_id}});
+
+                return res.json({collaborator: collaborator[0], diagram});
  
             } catch (error) {
                 if (error.name == 'RequestValidationError') {
@@ -53,7 +57,6 @@ module.exports = {
                 } else if (error.name == 'SequelizeValidationError') {
                     return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
                 } else {
-                    console.log(error);
                     return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
                 }
             }
@@ -83,7 +86,6 @@ module.exports = {
                 } else if (error.name == 'SequelizeValidationError') {
                     return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
                 } else {
-                    console.log(error);
                     return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
                 }
             }
@@ -113,7 +115,6 @@ module.exports = {
                 } else if (error.name == 'SequelizeValidationError') {
                     return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
                 } else {
-                    console.log(error);
                     return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
                 }
             }
