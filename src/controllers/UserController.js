@@ -17,7 +17,7 @@ module.exports = {
                     attributes: ['name', 'email', 'role', 'company']
                 });
 
-                if (!user) { return response.status(404).json({errors: [{msg: "Usuário não encontrado"}]}); }
+                if (!user) { return res.status(404).json({errors: [{msg: "Usuário não encontrado"}]}); }
     
                 return res.json(user);
     
@@ -36,7 +36,7 @@ module.exports = {
 
     update: {
         validations: [
-            body('name').isLength({ min: 3, max: 100 }).withMessage("O nome deve ter entre 3 e 100 caracteres").not().isEmpty().withMessage("Preencha o campo nome"),
+            body('name').isLength({ min: 3, max: 100 }).withMessage("O nome deve ter entre 3 e 100 caracteres").not().isEmpty().withMessage("Preencha o campo nome").isAlpha("pt-BR", {ignore:" "}).withMessage("O nome não deve conter caracteres especiais"),
             body('email').isLength({ min: 3, max: 100 }).withMessage("O email deve ter entre 3 e 100 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email"),
             body('password').isLength({ min: 8 }).withMessage("A senha deve ter no mínimo 8 caracteres").not().isEmpty().withMessage("Preencha o campo senha"),
             body('company').isLength({ max: 100 }).withMessage("A empresa deve ter no máximo 100 caracteres"),
