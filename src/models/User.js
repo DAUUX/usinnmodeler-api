@@ -18,7 +18,11 @@ class User extends Model {
                     len: {
                         args: [3, 100],
                         msg: 'O nome deve ter entre 3 e 100 caracteres'
-                    }
+                    },
+                    is:{
+                        args: /^[A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+$/, 
+                        msg:"O nome não deve conter caracteres especiais"
+                    }   // Aceita letras, espaços e letras com acentos
                 }
             },
             email: {
