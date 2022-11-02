@@ -29,6 +29,10 @@ class User extends Model {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {
+                    isEmail: {
+                        args:true,
+                        msg: 'O email deve ser um email válido'
+                    },
                     notNull: {
                         msg: 'Preencha o campo email'
                     },
@@ -55,11 +59,43 @@ class User extends Model {
                     }
                 }
             },
+            birthday: {
+                type: DataTypes.DATEONLY,
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo data de nascimento'
+                    },
+                    notEmpty: {
+                        args: true,
+                        msg: 'Preencha o campo data de nascimento'
+                    }
+                }
+            },
+            gender: {
+                type: DataTypes.INTEGER(1),
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo gênero'
+                    },
+                    min:1,
+                    max:3
+                }
+            },
             company: {
                 type: DataTypes.STRING,
             },
             role: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER(1),
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo perfil'
+                    },
+                    min:1,
+                    max:3
+                }
             },
         }, {
             sequelize: connection,
