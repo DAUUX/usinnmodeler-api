@@ -23,7 +23,7 @@ routes.post("/signin", [ AuthController.signin.validations ], AuthController.sig
 const userRoutes = express.Router();
 userRoutes.use([authJwt.verifyToken]);
 userRoutes.get("/", UserController.get.handler);
-userRoutes.put("/", UserController.update.handler);
+userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
 userRoutes.delete("/", UserController.delete.handler);
 routes.use('/user', userRoutes); 
 
@@ -33,8 +33,8 @@ diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
 diagramRoutes.get("/:id", DiagramController.get.handler);
-diagramRoutes.post("/", DiagramController.create.handler);
-diagramRoutes.put("/:id", DiagramController.update.handler);
+diagramRoutes.post("/", [DiagramController.create.validations], DiagramController.create.handler);
+diagramRoutes.put("/:id", [DiagramController.update.validations], DiagramController.update.handler);
 diagramRoutes.delete("/:id", DiagramController.delete.handler);
 routes.use('/diagrams', diagramRoutes); 
 
