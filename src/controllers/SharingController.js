@@ -1,6 +1,7 @@
 const jwt  = require('jsonwebtoken');
 const auth = require('../config/auth');
 const db = require("../database");
+const { handleExceptions } = require('../helpers');
 const ShareToken = db.shareToken;
 const Diagram = db.diagram;
 const Collaboration = db.collaboration;
@@ -30,13 +31,7 @@ module.exports = {
                 return res.json({token: share_token[0].token});
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
 
         }
@@ -65,13 +60,7 @@ module.exports = {
                 return res.status(204).send();
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
 
         }

@@ -2,7 +2,7 @@ const { body, validationResult } = require('express-validator');
 const db = require("../database");
 const Diagram = db.diagram;
 const Collaboration = db.collaboration;
-const { pagination } = require('../helpers');
+const { pagination, handleExceptions } = require('../helpers');
 
 module.exports = {
 
@@ -24,13 +24,7 @@ module.exports = {
                 return res.json({diagrams: diagrams.rows, pagination: {limit, page: page+1, total: diagrams.count}});
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }
@@ -59,13 +53,7 @@ module.exports = {
                 return res.json({diagrams: diagrams});
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }
@@ -86,13 +74,7 @@ module.exports = {
                 return res.json(diagram);
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }
@@ -119,13 +101,7 @@ module.exports = {
                 return res.json(diagram);
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
         }
     },
@@ -157,13 +133,7 @@ module.exports = {
                 return res.json(diagram);
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
         }
     },
@@ -191,13 +161,7 @@ module.exports = {
                 return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }
