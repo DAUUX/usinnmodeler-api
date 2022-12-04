@@ -15,9 +15,11 @@ routes.use(function (req, res, next) {
     next();
 });
 
-// Rotas de login e cadastro
+// Rotas de autenticação
 routes.post("/signup", [ verifySignUp.checkDuplicateEmail, AuthController.signup.validations ], AuthController.signup.handler);
 routes.post("/signin", [ AuthController.signin.validations ], AuthController.signin.handler);
+routes.post("/recover-password", [ AuthController.passwordRecovery.validations ], AuthController.passwordRecovery.handler);
+routes.post("/reset-password", [ AuthController.passwordReset.validations ], AuthController.passwordReset.handler);
 
 // Rotas de usuário
 const userRoutes = express.Router();

@@ -2,6 +2,7 @@ const { body, validationResult } = require('express-validator');
 const db = require("../database");
 const User = db.user;
 const bcrypt = require("bcryptjs");
+const { handleExceptions } = require('../helpers');
 
 module.exports = {
 
@@ -22,13 +23,7 @@ module.exports = {
                 return res.json(user);
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }
@@ -63,13 +58,7 @@ module.exports = {
                 return res.status(200).send();
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
         }
     },
@@ -86,13 +75,7 @@ module.exports = {
                 return res.status(204).send();
     
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
             
         }

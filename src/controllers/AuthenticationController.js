@@ -1,10 +1,14 @@
 const { body, validationResult } = require('express-validator');
 const db = require("../database");
 const User = db.user;
+const RecoverToken = db.recoverToken;
 const jwt = require("jsonwebtoken");
 const auth = require("../config/auth");
 const bcrypt = require("bcryptjs");
 const _pick = require("lodash/pick");
+const { handleExceptions } = require('../helpers');
+const { resetPasswordMail } = require('../config/mail');
+
 
 module.exports = {
 
@@ -30,16 +34,10 @@ module.exports = {
                 const { name, email, password, birthday, gender, company, role } = req.body;
 
                 const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role });
-                return res.json(_pick(user, ["name", "email", "company", "role"]));
+                return res.json(_pick(user, ["name", "email"]));
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({errors: error.errors.array()});
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
-                } else {
-                    return res.status(500).json({ errors: [{msg: "Não foi possível processar esta requisição"}] });
-                }
+                return handleExceptions(error, res);
             }
         }
     },
@@ -86,15 +84,82 @@ module.exports = {
                 });
 
             } catch (error) {
-                if (error.name == 'RequestValidationError') {
-                    return res.status(422).json({ errors: error.errors.array() });
-                } else if (error.name == 'SequelizeValidationError') {
-                    return res.status(422).json({ errors: error.errors.map(e => ({ msg: e.message })) });
-                } else {
-                    return res.status(500).json({ errors: [{ msg: "Não foi possível processar esta requisição" }] });
-                }
+                return handleExceptions(error, res);
             }
         }
-    }
+    },
+
+    passwordRecovery: {
+        validations: [
+            body('email').isLength({ min: 3, max: 100 }).withMessage("O email deve ter entre 3 e 100 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email")
+        ], 
+        handler: async (req, res) => {
+            
+            try {
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) 
+                    throw {name: 'RequestValidationError', errors};
+
+                const { email } = req.body;
+
+                const user = await User.findOne({
+                    where: {email}
+                });
+
+                if (!user)
+                    return res.status(404).json({ errors: [{ msg: "Email não cadastrado!"}] });
+
+                let token = jwt.sign({ user_id: user.id }, auth.secret, { expiresIn: '1h' });
+
+                let recover_token = await RecoverToken.findOrCreate({where: { user_id: user.id }, defaults: { token: token, user_id: user.id }})
+
+                await resetPasswordMail(user.email, recover_token[0].token);
+
+                return res.status(200).send("O email com as instruções para recuperação de senha foi enviado");
+
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
+
+    passwordReset: {
+        validations: [
+            body('password').isLength({ min: 8 }).withMessage("A senha deve ter no mínimo 8 caracteres").not().isEmpty().withMessage("Preencha o campo senha"),
+            body('token').not().isEmpty().withMessage("Token de recuperação é requerido")
+        ], 
+        handler: async (req, res) => {
+
+            const { password, token } = req.body;
+            
+            try {
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) 
+                    throw {name: 'RequestValidationError', errors};
+                
+                let { user_id } = jwt.verify(token, auth.secret);
+                
+                const recover_token = await RecoverToken.findOne({
+                    where: {token, user_id}
+                });
+
+                if (!recover_token)
+                    return res.status(404).json({ errors: [{ msg: "Token de recuperação inválido!"}] });
+
+                await User.update({ password: bcrypt.hashSync(password, 8) }, {
+                    where: { id: user_id }
+                });
+
+                return res.status(200).send("Senha redefinida com sucesso!")
+
+            } catch (error) {
+                return handleExceptions(error, res);
+            } finally {
+                RecoverToken.destroy({where: {token}})
+            }
+        }
+    },
 
 }

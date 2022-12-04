@@ -6,6 +6,7 @@ module.exports = {
     database: process.env.DB_NAME,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
     dialectOptions: {
         dateStrings: true,
         typeCast: function (field, next) { // ler do banco datetime em string
