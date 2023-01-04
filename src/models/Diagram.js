@@ -25,6 +25,10 @@ class Diagram extends Model {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            diagram_svg: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             is_shared: {
                 type: DataTypes.STRING,
                 allowNull: true,
