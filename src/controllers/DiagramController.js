@@ -26,7 +26,9 @@ module.exports = {
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
 
-                return res.json({diagrams: diagrams.rows, pagination: {limit, page: page+1, total: diagrams.count}});
+                let result = diagrams.rows.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
+
+                return res.json({diagrams: result, pagination: {limit, page: page+1, total: diagrams.count}});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -55,7 +57,9 @@ module.exports = {
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
 
-                return res.json({diagrams: diagrams});
+                let result = diagrams.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
+
+                return res.json({diagrams: result});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -162,7 +166,6 @@ module.exports = {
                 return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
 
             } catch (error) {
-                console.log(error)
                 return handleExceptions(error, res);
             }
         }
