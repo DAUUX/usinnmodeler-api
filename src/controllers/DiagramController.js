@@ -3,6 +3,11 @@ const db = require("../database");
 const Diagram = db.diagram;
 const Collaboration = db.collaboration;
 const { pagination, handleExceptions } = require('../helpers');
+const fs = require('fs');
+const path = require('path');
+
+const UPLOADS_FOLDER = '../public/uploads/'
+const FILES_PATH = '/files/'
 
 module.exports = {
 
@@ -21,7 +26,9 @@ module.exports = {
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
 
-                return res.json({diagrams: diagrams.rows, pagination: {limit, page: page+1, total: diagrams.count}});
+                let result = diagrams.rows.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
+
+                return res.json({diagrams: result, pagination: {limit, page: page+1, total: diagrams.count}});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -50,7 +57,9 @@ module.exports = {
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
 
-                return res.json({diagrams: diagrams});
+                let result = diagrams.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
+
+                return res.json({diagrams: result});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -71,7 +80,7 @@ module.exports = {
 
                 if (!diagram) { return res.status(404).json({errors: [{msg: "Diagrama não encontrado"}]}); }
     
-                return res.json(diagram);
+                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -94,11 +103,23 @@ module.exports = {
 
                 const user_id = req.user_id;
 
-                const { name, diagram_data } = req.body;
+                const { name, diagram_data, diagram_svg } = req.body;
 
-                const diagram = await Diagram.create({ name, diagram_data, user_id});
+                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                
+                if (diagram_svg) {
+    
+                    let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                        return err
+                    });
+    
+                    if (file_err) throw {name: 'FileWritingError', errors};
 
-                return res.json(diagram);
+                }
+
+                const diagram = await Diagram.create({ name, diagram_data, user_id, diagram_svg: diagram_svg ? file_name : ''});
+
+                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
 
             } catch (error) {
                 return handleExceptions(error, res);
@@ -120,17 +141,29 @@ module.exports = {
 
                 const user_id = req.user_id;
                 const { id } = req.params;
-
-                const { name, diagram_data } = req.body;
+                const { name, diagram_data, diagram_svg } = req.body;
 
                 const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id); 
 
                 if (!diagram)
                     return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
+    
+                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                
+                if (diagram_svg) {
+                
+                    fs.unlinkSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg));
 
-                diagram.update({ name, diagram_data }, { where: { id } });
+                    let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                        return err
+                    });
+    
+                    if (file_err) throw {name: 'FileWritingError', errors};
+                }
 
-                return res.json(diagram);
+                diagram.update({ name, diagram_data, diagram_svg: diagram_svg ? file_name : diagram.diagram_svg }, { where: { id } });
+
+                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
 
             } catch (error) {
                 return handleExceptions(error, res);

@@ -1,5 +1,6 @@
 const express = require('express');
 const routes = express.Router();
+const path = require('path');
 const { verifySignUp, authJwt } = require("./middleware");
 const AuthController = require("./controllers/AuthenticationController");
 const UserController = require("./controllers/UserController");
@@ -14,6 +15,9 @@ routes.use(function (req, res, next) {
     );
     next();
 });
+    
+//Rotas de arquivos estáticos
+routes.use('/files', express.static(path.join(__dirname, 'public/uploads')))
 
 // Rotas de autenticação
 routes.post("/signup", [ verifySignUp.checkDuplicateEmail, AuthController.signup.validations ], AuthController.signup.handler);
