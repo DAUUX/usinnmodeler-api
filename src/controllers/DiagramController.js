@@ -152,7 +152,8 @@ module.exports = {
                 
                 if (diagram_svg) {
                 
-                    fs.unlinkSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg));
+                    if (fs.existsSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                        fs.unlinkSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg));
 
                     let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
                         return err
