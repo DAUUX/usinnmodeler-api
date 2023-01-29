@@ -127,6 +127,37 @@ module.exports = {
         }
     },
 
+    rename: {
+        validations: [
+            body('name').isLength({ min: 3, max: 255 }).withMessage("O nome deve ter entre 3 e 255 caracteres").not().isEmpty().withMessage("Preencha o campo nome")
+        ], 
+        handler: async (req, res) => {
+            
+            try {
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) 
+                    throw {name: 'RequestValidationError', errors};
+
+                const user_id = req.user_id;
+                const { id } = req.params;
+                const { name } = req.body;
+
+                const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id); 
+
+                if (!diagram)
+                    return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
+
+                diagram.update({ name }, { where: { id } });
+
+                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
+
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
+
     update: {
         validations: [
             body('name').isLength({ min: 3, max: 255 }).withMessage("O nome deve ter entre 3 e 255 caracteres").not().isEmpty().withMessage("Preencha o campo nome")
