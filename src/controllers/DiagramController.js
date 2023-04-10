@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const UPLOADS_FOLDER = '../public/uploads/'
-const FILES_PATH = '/files/'
+const FILES_PATH = 'files/'
 
 module.exports = {
 
