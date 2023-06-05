@@ -1,3 +1,5 @@
+const sharp = require("sharp");
+
 const { body, validationResult } = require('express-validator');
 const db = require("../database");
 const Diagram = db.diagram;
@@ -229,6 +231,47 @@ module.exports = {
                 return handleExceptions(error, res);
             }
             
+        }
+    },
+
+    export: {
+        validations: [
+            body('svg').not().isEmpty().withMessage("SVG é necessário!"),
+            body("format").isInt({min: 1, max: 3}).withMessage("Formato inválido!")
+        ], 
+        handler: async (req, res) => {
+            
+            try {
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) 
+                    throw {name: 'RequestValidationError', errors};
+
+                const { svg, format } = req.body;
+
+                const formats = ["png", "jpeg", "webp"];
+                let data = null;
+
+                let img_format = formats[format-1];
+
+                switch(img_format){
+                    case "png":
+                        data = await sharp(Buffer.from(svg)).png().toBuffer();
+                        break;
+                    case "jpeg":
+                        data = await sharp(Buffer.from(svg)).jpeg().toBuffer();
+                        break;
+                    case "webp":
+                        data = await sharp(Buffer.from(svg)).webp().toBuffer();
+                        break;
+                    default:
+                        return res.status(400).json({ errors: [{msg: "Formato inválido!"}] });
+                }
+                return res.json({img: data.toString("base64"), format: img_format});
+                
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
         }
     }
 

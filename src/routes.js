@@ -38,12 +38,14 @@ const diagramRoutes = express.Router();
 diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
+diagramRoutes.post("/export", [ DiagramController.export.validations ], DiagramController.export.handler);
 diagramRoutes.get("/:id", DiagramController.get.handler);
 diagramRoutes.post("/", [DiagramController.create.validations], DiagramController.create.handler);
 diagramRoutes.put("/rename/:id", [DiagramController.rename.validations], DiagramController.rename.handler);
 diagramRoutes.put("/:id", [DiagramController.update.validations], DiagramController.update.handler);
 diagramRoutes.delete("/:id", DiagramController.delete.handler);
 routes.use('/diagrams', diagramRoutes); 
+
 
 // Rotas de compartilhamento
 const sharingRoutes = express.Router();
