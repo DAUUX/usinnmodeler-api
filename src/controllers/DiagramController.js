@@ -237,7 +237,7 @@ module.exports = {
     export: {
         validations: [
             body('svg').not().isEmpty().withMessage("SVG é necessário!"),
-            body("format").isInt({min: 1, max: 3})
+            body("format").isInt({min: 1, max: 3}).withMessage("Formato inválido!")
         ], 
         handler: async (req, res) => {
             
@@ -270,7 +270,6 @@ module.exports = {
                 return res.json({img: data.toString("base64"), format: img_format});
                 
             } catch (error) {
-                console.log(error);
                 return handleExceptions(error, res);
             }
         }
