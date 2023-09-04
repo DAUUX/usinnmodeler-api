@@ -28,6 +28,7 @@ routes.post("/reset-password", [ AuthController.passwordReset.validations ], Aut
 // Rotas de usuário
 const userRoutes = express.Router();
 userRoutes.use([authJwt.verifyToken]);
+userRoutes.get("/check-password", [UserController.checkPassord.validations], UserController.checkPassord.handler)
 userRoutes.get("/", UserController.get.handler);
 userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
 userRoutes.delete("/", UserController.delete.handler);

@@ -3,6 +3,7 @@ const db = require("../database");
 const User = db.user;
 const bcrypt = require("bcryptjs");
 const { handleExceptions } = require('../helpers');
+const res = require('express/lib/response');
 
 module.exports = {
 
@@ -56,6 +57,36 @@ module.exports = {
                 });
 
                 return res.status(200).send();
+
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
+
+    checkPassord: {
+        validations: [
+            body('password').isLength({ min: 8 }).withMessage("A senha deve ter no mínimo 8 carcteres").not().isEmpty().withMessage("Preencha o campo senha"),
+        ],
+        handler: async (req, res) => {
+
+            try {
+
+                const errors = validationResult(req);
+                if(!errors.isEmpty())
+                    throw {name: "RequestValidationError", errors};
+
+                const {password} = req.body;
+
+                const id = req.user_id;
+                const user = await User.findByPk(id);
+
+                const compare = bcrypt.compareSync(password, user.password);
+
+                if(compare){
+                    return res.status(204).send();
+                }
+                return res.status(406).json({errors: [{msg: "A senha digitada não corresponde a senha cadastrada!"}]});
 
             } catch (error) {
                 return handleExceptions(error, res);
