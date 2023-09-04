@@ -3,7 +3,6 @@ const db = require("../database");
 const User = db.user;
 const bcrypt = require("bcryptjs");
 const { handleExceptions } = require('../helpers');
-const res = require('express/lib/response');
 
 module.exports = {
 
