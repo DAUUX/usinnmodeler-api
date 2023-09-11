@@ -1,3 +1,2 @@
 [phases.setup]
-nixPkgs = ["...", "fontconfig"]
-nixLibs = ["...", "fontconfig"]
+aptPkgs = ['...', 'fontconfig']
