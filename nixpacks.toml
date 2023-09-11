@@ -1,2 +1,3 @@
 [phases.setup]
 nixPkgs = ["...", "fontconfig"]
+nixLibs = ["...", "fontconfig"]
