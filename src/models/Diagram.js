@@ -61,6 +61,7 @@ class Diagram extends Model {
 	static associate(models) {
 		this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user'});
 		this.hasMany(models.Collaboration, { foreignKey: 'diagram_id', as: 'collaboration'});
+        this.hasMany(models.Favorite, { foreignKey: 'diagram_id', as: 'favorite'});
 	}
 
 }

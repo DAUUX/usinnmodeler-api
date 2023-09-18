@@ -4,6 +4,7 @@ const { body, validationResult } = require('express-validator');
 const db = require("../database");
 const Diagram = db.diagram;
 const Collaboration = db.collaboration;
+const Favorite = db.favorite;
 const { pagination, handleExceptions } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
@@ -18,19 +19,17 @@ module.exports = {
 
             try {
 
-                const {limit, offset, page} = pagination(req);
                 const user_id = req.user_id;
     
                 // Busca e conta todos os registros passando os dados para paginação
-                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAndCountAll({
-                    limit,
-                    offset,
-                    order: [['id', 'DESC']] //Mais recentes primeiro
+                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll({
+                    order: [['id', 'DESC']], //Mais recentes primeiro
+                    include: [{model: Favorite, as: "favorite", where: user_id, required: false}]
                 });
 
-                let result = diagrams.rows.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
-
-                return res.json({diagrams: result, pagination: {limit, page: page+1, total: diagrams.count}});
+                let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
+                
+                return res.json({diagrams: result});
     
             } catch (error) {
                 return handleExceptions(error, res);
@@ -46,7 +45,6 @@ module.exports = {
 
                 const user_id = req.user_id;
     
-                // Busca e conta todos os registros passando os dados para paginação
                 const diagrams = await Diagram.findAll({
                     where: {
                         '$collaboration.collaborator_id$': user_id
@@ -55,11 +53,48 @@ module.exports = {
                         model: Collaboration,
                         as: 'collaboration',
                         required: true
+                    }, 
+                    {
+                        model: Favorite, 
+                        as: "favorite", 
+                        where: user_id, 
+                        required: false
                     }],
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
 
-                let result = diagrams.map(item => ({...item.dataValues, diagram_svg: FILES_PATH+item.diagram_svg}));
+                let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
+
+                return res.json({diagrams: result});
+    
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+            
+        }
+    },
+
+    getAllFavorited: {
+        handler: async (req, res) => {
+
+            try {
+
+                const user_id = req.user_id;
+    
+                const diagrams = await Diagram.findAll({
+                    where: {
+                        '$favorite.user_id$': user_id
+                    },
+                    include: [
+                    {
+                        model: Favorite, 
+                        as: "favorite", 
+                        where: user_id
+                    }],
+                    order: [['id', 'DESC']] //Mais recentes primeiro
+                });
+
+                let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
 
                 return res.json({diagrams: result});
     
@@ -209,10 +244,11 @@ module.exports = {
         handler: async (req, res) => {
     
             try {
-    
+                
                 const { id } = req.params;
                 const user_id = req.user_id;
 
+                await Favorite.scope({ method: ['byDiagram', id] }).destroy({ where: user_id });
                 const diagram = await Diagram.scope({ method: ['byUser', user_id] }).findByPk(id);
                 if (diagram) {
                     diagram.destroy();
