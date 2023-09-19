@@ -2,8 +2,10 @@ const jwt  = require('jsonwebtoken');
 const auth = require('../config/auth');
 const db = require("../database");
 const { handleExceptions } = require('../helpers');
+const Favorite = db.favorite;
 const Collaboration = db.collaboration;
 const Diagram = db.diagram;
+const { Op } = require("sequelize");
 
 module.exports = {
 
@@ -66,6 +68,7 @@ module.exports = {
                     return res.status(422).json({errors: [{msg: "Diagrama não existe"}]});
 
                 await Collaboration.scope({ method: ['byDiagram', diagram_id] }).destroy({ where: {id} });
+                await Favorite.scope({ method: ['byDiagram', diagram_id] }).destroy({ where: {id} });
     
                 return res.status(204).send();
     
@@ -89,6 +92,7 @@ module.exports = {
                     return res.status(422).json({errors: [{msg: "Diagrama não existe"}]});
 
                 await Collaboration.scope({ method: ['byDiagram', diagram_id] }).destroy();
+                await Favorite.scope({ method: ['byDiagram', diagram_id] }).destroy({ where: {user_id: {[Op.ne]: user_id}}});
     
                 return res.status(204).send();
     
