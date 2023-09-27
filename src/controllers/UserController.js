@@ -15,7 +15,7 @@ module.exports = {
     
                 const user = await User.findOne({
                     where: {id},
-                    attributes: ['name', 'email', 'role', 'company']
+                    attributes: ['name', 'email', 'role', 'birthday', 'gender', 'avatar', 'company']
                 });
 
                 if (!user) { return res.status(404).json({errors: [{msg: "Usuário não encontrado"}]}); }
@@ -38,6 +38,7 @@ module.exports = {
             body('gender').isInt({ min: 1, max: 3 }).withMessage("O campo gênero é inválido"),
             body('company').isLength({ max: 100 }).withMessage("A empresa deve ter no máximo 100 caracteres"),
             body('role').isInt({ min: 1, max: 3 }).withMessage("O campo perfil é inválido"),
+            body('avatar').isInt({ min: 1, max: 4}).withMessage("O campo avatar é inválido"),
         ], 
         handler: async (req, res) => {
             
@@ -49,9 +50,23 @@ module.exports = {
 
                 const id = req.user_id;
 
-                const { name, email, password, birthday, gender, company, role } = req.body;
+                const { name, email, password, birthday, gender, company, role, avatar } = req.body;
 
-                const user = await User.update({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role }, {
+                const user = await User.findOne({
+                    where: {id},
+                    attributes: ['email']
+                });
+
+                if(email != user.email){
+                    const email_is_used = await User.findOne({
+                        where: {email}
+                    });
+                    if(email_is_used){
+                        return res.status(406).json({errors: [{msg: "O email já está sendo utilizado!"}]});
+                    }
+                }
+
+                const updated_user = await User.update({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role, avatar }, {
                     where: { id }
                 });
 
