@@ -7,6 +7,7 @@ const UserController = require("./controllers/UserController");
 const DiagramController = require("./controllers/DiagramController");
 const SharingController = require('./controllers/SharingController');
 const CollaborationController = require('./controllers/CollaborationController');
+const FavoriteController = require('./controllers/FavoriteController');
 
 routes.use(function (req, res, next) {
     res.header(
@@ -39,6 +40,7 @@ const diagramRoutes = express.Router();
 diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
+diagramRoutes.get("/favorited", DiagramController.getAllFavorited.handler);
 diagramRoutes.post("/export", [ DiagramController.export.validations ], DiagramController.export.handler);
 diagramRoutes.get("/:id", DiagramController.get.handler);
 diagramRoutes.post("/", [DiagramController.create.validations], DiagramController.create.handler);
@@ -63,5 +65,12 @@ collaborationRoutes.post("/:token", CollaborationController.create.handler);
 collaborationRoutes.delete("/:diagram_id/all", CollaborationController.deleteAllCollaborators.handler);
 collaborationRoutes.delete("/:diagram_id/:id", CollaborationController.delete.handler);
 routes.use('/collaboration', collaborationRoutes); 
+
+// Rotas de favorito
+const favoriteRoutes = express.Router();
+favoriteRoutes.use([authJwt.verifyToken]);
+favoriteRoutes.post("/:diagram_id", FavoriteController.create.handler);
+favoriteRoutes.delete("/:diagram_id", FavoriteController.delete.handler);
+routes.use('/favorite', favoriteRoutes); 
 
 module.exports = routes;
