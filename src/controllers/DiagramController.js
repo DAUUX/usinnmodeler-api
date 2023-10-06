@@ -247,9 +247,11 @@ module.exports = {
                 
                 const { id } = req.params;
                 const user_id = req.user_id;
+                
 
-                await Favorite.scope({ method: ['byDiagram', id] }).destroy({ where: user_id });
+                await Favorite.scope({ method: ['byDiagram', id] }).destroy({ where: {user_id:user_id} });
                 const diagram = await Diagram.scope({ method: ['byUser', user_id] }).findByPk(id);
+                
                 if (diagram) {
                     diagram.destroy();
                     return res.status(204).send();
@@ -262,8 +264,9 @@ module.exports = {
                 }
 
                 return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
-    
+                
             } catch (error) {
+                console.log("\n\n"+error)
                 return handleExceptions(error, res);
             }
             
