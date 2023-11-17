@@ -100,7 +100,7 @@ class User extends Model {
         }, {
             sequelize: connection,
             tableName: 'user',
-            paranoid: true
+            paranoid: false
         })
         return User;
     }
