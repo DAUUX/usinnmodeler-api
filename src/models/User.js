@@ -97,6 +97,17 @@ class User extends Model {
                     max:3
                 }
             },
+            avatar: {
+                type: DataTypes.INTEGER(1),
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo avatar'
+                    },
+                    min:1,
+                    max:4
+                }
+            },
         }, {
             sequelize: connection,
             tableName: 'user',
