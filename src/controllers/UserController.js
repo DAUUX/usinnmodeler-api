@@ -15,7 +15,7 @@ module.exports = {
     
                 const user = await User.findOne({
                     where: {id},
-                    attributes: ['name', 'email', 'role', 'birthday', 'gender', 'avatar', 'company']
+                    attributes: ['id', 'name', 'email', 'role', 'birthday', 'gender', 'avatar', 'company']
                 });
 
                 if (!user) { return res.status(404).json({errors: [{msg: "Usuário não encontrado"}]}); }
