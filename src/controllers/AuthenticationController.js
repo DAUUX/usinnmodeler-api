@@ -166,7 +166,6 @@ module.exports = {
                 return res.status(200).send("Senha redefinida com sucesso!")
 
             } catch (error) {
-                console.log(error)
                 return handleExceptions(error, res);
             } 
         }
