@@ -33,7 +33,7 @@ module.exports = {
 
                 const { name, email, password, birthday, gender, company, role } = req.body;
 
-                const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role });
+                const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role, avatar:1 });
                 return res.json(_pick(user, ["name", "email"]));
 
             } catch (error) {
@@ -80,7 +80,8 @@ module.exports = {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    token: token
+                    token: token,
+                    avatar: user.avatar
                 });
 
             } catch (error) {

@@ -32,6 +32,7 @@ userRoutes.use([authJwt.verifyToken]);
 userRoutes.post("/check-password", [UserController.checkPassord.validations], UserController.checkPassord.handler)
 userRoutes.get("/", UserController.get.handler);
 userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
+userRoutes.put("/change-password", [UserController.changePassword.validations], UserController.changePassword.handler);
 userRoutes.delete("/", UserController.delete.handler);
 routes.use('/user', userRoutes); 
 
