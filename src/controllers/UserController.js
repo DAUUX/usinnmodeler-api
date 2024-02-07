@@ -94,6 +94,14 @@ module.exports = {
 
                 const {password} = req.body;
 
+                // Verifique se a nova senha é diferente da senha atual
+                const currentUser = await User.findByPk(id);
+                const isPasswordMatch = await bcrypt.compare(password, currentUser.password);
+
+                if (isPasswordMatch) {
+                    return res.status(406).json({errors: [{msg: "A nova senha não pode ser idêntica à senha atual. Por favor, escolha uma senha diferente para garantir a segurança da sua conta."}]});
+                }
+
                 const user = await User.update({password: bcrypt.hashSync(password, 8)}, {
                     where: { id }
                 });
