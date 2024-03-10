@@ -55,6 +55,7 @@ routes.use('/diagrams', diagramRoutes);
 const sharingRoutes = express.Router();
 sharingRoutes.use([authJwt.verifyToken]);
 sharingRoutes.post("/:diagram_id", SharingController.generateLink.handler);
+sharingRoutes.post("/:diagram_id/inviteLink", [ SharingController.inviteLink.validations ], SharingController.inviteLink.handler);
 sharingRoutes.delete("/:diagram_id", SharingController.removeLink.handler);
 routes.use('/share', sharingRoutes); 
 
@@ -62,9 +63,12 @@ routes.use('/share', sharingRoutes);
 const collaborationRoutes = express.Router();
 collaborationRoutes.use([authJwt.verifyToken]);
 collaborationRoutes.get("/:diagram_id", CollaborationController.getAll.handler);
+collaborationRoutes.get("/:diagram_id/getAllCollaborationWithName", CollaborationController.getAllCollaborationWithName.handler);
+collaborationRoutes.get("/:diagram_id/:user_id", CollaborationController.getCollaboratorPermission.handler);
 collaborationRoutes.post("/:token", CollaborationController.create.handler);
 collaborationRoutes.delete("/:diagram_id/all", CollaborationController.deleteAllCollaborators.handler);
 collaborationRoutes.delete("/:diagram_id/:id", CollaborationController.delete.handler);
+collaborationRoutes.put("/:diagram_id/:user_id", CollaborationController.updatePermission.handler);
 routes.use('/collaboration', collaborationRoutes); 
 
 // Rotas de favorito

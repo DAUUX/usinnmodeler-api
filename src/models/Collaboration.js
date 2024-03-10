@@ -1,9 +1,21 @@
-const { Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
 class Collaboration extends Model {
     
     static init(connection) {
-        super.init({}, {
+        super.init({
+            permission: {
+                type: DataTypes.INTEGER(1),
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo de permissão'
+                    },
+                    min:1,
+                    max:2
+                }   
+            },
+        }, {
             scopes: {
                 byDiagram(diagram_id) {
                     return {

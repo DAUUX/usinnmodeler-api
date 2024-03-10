@@ -185,6 +185,13 @@ module.exports = {
                 if (!diagram)
                     return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
 
+                
+                const collaborator = await Collaboration.findOne({raw: true, where : {collaborator_id : user_id, diagram_id: diagram.id}});
+
+                if (collaborator && collaborator.permission == 1) {
+                    return res.status(404).json({ errors: [{msg: "Usuário sem permissão para renomear diagrama!"}] });
+                }
+
                 diagram.update({ name }, { where: { id } });
 
                 return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
@@ -202,7 +209,6 @@ module.exports = {
         handler: async (req, res) => {
             
             try {
-
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) 
                     throw {name: 'RequestValidationError', errors};
@@ -211,11 +217,16 @@ module.exports = {
                 const { id } = req.params;
                 const { name, diagram_data, diagram_svg } = req.body;
 
-                const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id); 
+                const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id);             
 
                 if (!diagram)
                     return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
-    
+
+                
+                const collaborator = await Collaboration.findOne({raw: true, where : {collaborator_id : user_id, diagram_id: diagram.id}});
+
+                if (collaborator && collaborator.permission == 1) throw {errors};
+               
                 let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
                 
                 if (diagram_svg) {
@@ -266,7 +277,6 @@ module.exports = {
                 return res.status(404).json({ errors: [{msg: "Diagrama não encontrado!"}] });
                 
             } catch (error) {
-                console.log("\n\n"+error)
                 return handleExceptions(error, res);
             }
             
