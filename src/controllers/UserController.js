@@ -45,7 +45,7 @@ module.exports = {
 
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) 
-                    throw {name: 'RequestValidationError', errors};
+                    throw {name: 'RequestValidationError', errors: errors.array()};
 
                 const id = req.user_id;
 
@@ -65,7 +65,7 @@ module.exports = {
                     }
                 }
 
-                const updated_user = await User.update({ name, email, birthday, gender, company, role, avatar }, {
+                await User.update({ name, email, birthday, gender, company, role, avatar }, {
                     where: { id }
                 });
 
@@ -88,7 +88,7 @@ module.exports = {
 
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) 
-                    throw {name: 'RequestValidationError', errors};
+                    throw {name: 'RequestValidationError', errors: errors.array()};
 
                 const id = req.user_id;
 
@@ -102,7 +102,7 @@ module.exports = {
                     return res.status(406).json({errors: [{msg: "A nova senha não pode ser idêntica à senha atual. Por favor, escolha uma senha diferente para garantir a segurança da sua conta."}]});
                 }
 
-                const user = await User.update({password: bcrypt.hashSync(password, 8)}, {
+                await User.update({password: bcrypt.hashSync(password, 8)}, {
                     where: { id }
                 });
 
@@ -124,7 +124,7 @@ module.exports = {
 
                 const errors = validationResult(req);
                 if(!errors.isEmpty())
-                    throw {name: "RequestValidationError", errors};
+                    throw {name: "RequestValidationError", errors: errors.array()};
 
                 const {password} = req.body;
 
