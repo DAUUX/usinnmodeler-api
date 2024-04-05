@@ -21,5 +21,17 @@ module.exports = {
                 <p> Link para redefinição de senha: <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}/redefinir-senha/${token}</a></p>
             `
         })
+    },
+    sendLinkMail: async (to, link, username)=>{
+        return await mailTransporter.sendMail({
+            from: process.env.MAIL_USER,
+            to,
+            subject: 'USINN Modeler - Link de diagrama compartilhado',
+            html: `
+                <p> Você recebeu um convite para editar o diagrama de ${username}.</p>
+            
+                <p> Link do diagrama: <a href="${link}">Abrir link</a></p>
+            `
+        })
     }
 }
