@@ -57,7 +57,7 @@ module.exports = {
                     {
                         model: Favorite, 
                         as: "favorite", 
-                        where: user_id, 
+                        where: {'$favorite.user_id$': user_id}, 
                         required: false
                     }],
                     order: [['id', 'DESC']] //Mais recentes primeiro
