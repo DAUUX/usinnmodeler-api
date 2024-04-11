@@ -46,7 +46,7 @@ module.exports = {
     inviteLink: {        
         validations: [
            
-            body('users.*.email').isLength({ min: 3, max: 100 }).withMessage("O email deve ter entre 3 e 100 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email"),
+            body('usersInvited.*.email').isLength({ min: 3, max: 100 }).withMessage("O email deve ter entre 3 e 100 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email"),
             
         ],
         handler: async (req, res) => {           
