@@ -24,7 +24,7 @@ module.exports = {
                 // Busca e conta todos os registros passando os dados para paginação
                 const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll({
                     order: [['id', 'DESC']], //Mais recentes primeiro
-                    include: [{model: Favorite, as: "favorite", where: user_id, required: false}]
+                    include: [{model: Favorite, as: "favorite", where: {'$favorite.user_id$': user_id}, required: false}]
                 });
 
                 let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
@@ -89,7 +89,7 @@ module.exports = {
                     {
                         model: Favorite, 
                         as: "favorite", 
-                        where: user_id
+                        where: {'$favorite.user_id$': user_id}
                     }],
                     order: [['id', 'DESC']] //Mais recentes primeiro
                 });
