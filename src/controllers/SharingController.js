@@ -54,13 +54,14 @@ module.exports = {
             try {    
                 
                 const errors = validationResult(req);
-                if (!errors.isEmpty()) 
-                    throw {name: 'RequestValidationError', errors};
-
+                if (!errors.isEmpty()) {             
+                    throw {name: 'InvalidEmailError', errors};
+                }                
+                
                 const { link, usersInvited } = req.body;
                 const user_id = req.user_id;
                 const { diagram_id } = req.params;  
-
+                         
                 const diagram = await Diagram.scope({ method: ['byUser', user_id] }).findByPk(diagram_id);
                 if (!diagram)
                     return res.status(422).json({errors: [{msg: "Diagrama não existe"}]});
