@@ -16,6 +16,12 @@ module.exports = {
             case 'RequestValidationError':
                 return res.status(422).json({errors: error.errors.array()});
 
+            case "InvalidEmailError":
+                const uniqueErrors = error.errors.array().filter((err, index, self) =>
+                    index === self.findIndex((e) => e.msg === err.msg)
+                );
+                return res.status(422).json({errors: uniqueErrors});
+
             case 'SequelizeValidationError':
                 return res.status(422).json({ errors: error.errors.map(e => ({msg: e.message})) });
 

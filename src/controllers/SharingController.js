@@ -46,7 +46,7 @@ module.exports = {
     inviteLink: {        
         validations: [
            
-            body('users.*.email').isLength({ min: 3, max: 100 }).withMessage("O email deve ter entre 3 e 100 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email"),
+            body('usersInvited.*.email').isLength({max: 255 }).withMessage("O email deve ter menos de 255 caracteres").isEmail().withMessage("O campo deve ser um email válido").not().isEmpty().withMessage("Preencha o campo email"),
             
         ],
         handler: async (req, res) => {           
@@ -54,13 +54,14 @@ module.exports = {
             try {    
                 
                 const errors = validationResult(req);
-                if (!errors.isEmpty()) 
-                    throw {name: 'RequestValidationError', errors};
-
+                if (!errors.isEmpty()) {             
+                    throw {name: 'InvalidEmailError', errors};
+                }                
+                
                 const { link, usersInvited } = req.body;
                 const user_id = req.user_id;
                 const { diagram_id } = req.params;  
-
+                         
                 const diagram = await Diagram.scope({ method: ['byUser', user_id] }).findByPk(diagram_id);
                 if (!diagram)
                     return res.status(422).json({errors: [{msg: "Diagrama não existe"}]});
