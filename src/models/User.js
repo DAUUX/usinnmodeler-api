@@ -41,8 +41,8 @@ class User extends Model {
                         msg: 'Preencha o campo email'
                     },
                     len: {
-                        args: [3, 100],
-                        msg: 'O email deve ter entre 3 e 100 caracteres'
+                        args: [1, 255],
+                        msg: 'O email deve ter menos de 255 caracteres'
                     }
                 }
             },
