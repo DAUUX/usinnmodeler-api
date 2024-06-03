@@ -85,6 +85,16 @@ class User extends Model {
             },
             company: {
                 type: DataTypes.STRING,
+                allowNull: false,
+                validate: {
+                    notNull: {
+                        msg: 'Preencha o campo organização'
+                    },
+                    notEmpty: {
+                        args: true,
+                        msg: 'Preencha o campo organização'
+                    }
+                }
             },
             role: {
                 type: DataTypes.INTEGER(1),
