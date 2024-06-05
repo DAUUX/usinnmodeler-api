@@ -1,4 +1,6 @@
 const sharp = require("sharp");
+const SVGtoPDF = require('svg-to-pdfkit');
+const PDFDocument = require('pdfkit');
 
 const { body, validationResult } = require('express-validator');
 const db = require("../database");
@@ -286,7 +288,7 @@ module.exports = {
     export: {
         validations: [
             body('svg').not().isEmpty().withMessage("SVG é necessário!"),
-            body("format").isInt({min: 1, max: 3}).withMessage("Formato inválido!")
+            body("format").isInt({min: 1, max: 4}).withMessage("Formato inválido!")
         ], 
         handler: async (req, res) => {
             
@@ -298,7 +300,7 @@ module.exports = {
 
                 const { svg, format } = req.body;
 
-                const formats = ["png", "jpeg", "webp"];
+                const formats = ["png", "jpeg", "webp", "pdf"];
                 let data = null;
 
                 let img_format = formats[format-1];
@@ -313,6 +315,23 @@ module.exports = {
                     case "webp":
                         data = await sharp(Buffer.from(svg)).webp().toBuffer();
                         break;
+                    case "pdf":
+                        data = await new Promise((resolve, reject) => {
+                                const pdfDoc = new PDFDocument();
+                                const buffers = [];
+                        
+                                pdfDoc.on('data', buffers.push.bind(buffers));
+                                pdfDoc.on('end', () => {
+                                    const pdfData = Buffer.concat(buffers);
+                                    resolve(pdfData);
+                                });
+                        
+                                pdfDoc.on('error', reject);
+                        
+                                SVGtoPDF(pdfDoc, svg, 0, 0);
+                                pdfDoc.end();
+                            });
+                        break;
                     default:
                         return res.status(400).json({ errors: [{msg: "Formato inválido!"}] });
                 }
@@ -324,4 +343,22 @@ module.exports = {
         }
     }
 
+}
+
+function generatePDFBuffer(svg) {
+    return new Promise((resolve, reject) => {
+        const pdfDoc = new PDFDocument();
+        const buffers = [];
+
+        pdfDoc.on('data', buffers.push.bind(buffers));
+        pdfDoc.on('end', () => {
+            const pdfData = Buffer.concat(buffers);
+            resolve(pdfData);
+        });
+
+        pdfDoc.on('error', reject);
+
+        SVGtoPDF(pdfDoc, svg, 0, 0);
+        pdfDoc.end();
+    });
 }
