@@ -27,10 +27,8 @@
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.8.0",
-    "pdfkit": "^0.15.0",
     "sequelize": "^6.17.0",
-    "sharp": "^0.32.1",
-    "svg-to-pdfkit": "^0.1.8"
+    "sharp": "^0.32.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.15",
