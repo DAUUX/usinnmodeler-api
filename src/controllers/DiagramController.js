@@ -1,4 +1,6 @@
 const sharp = require("sharp");
+const SVGtoPDF = require('svg-to-pdfkit');
+const PDFDocument = require('pdfkit');
 
 const { body, validationResult } = require('express-validator');
 const db = require("../database");
