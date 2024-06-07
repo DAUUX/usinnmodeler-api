@@ -342,21 +342,3 @@ module.exports = {
     }
 
 }
-
-function generatePDFBuffer(svg) {
-    return new Promise((resolve, reject) => {
-        const pdfDoc = new PDFDocument();
-        const buffers = [];
-
-        pdfDoc.on('data', buffers.push.bind(buffers));
-        pdfDoc.on('end', () => {
-            const pdfData = Buffer.concat(buffers);
-            resolve(pdfData);
-        });
-
-        pdfDoc.on('error', reject);
-
-        SVGtoPDF(pdfDoc, svg, 0, 0);
-        pdfDoc.end();
-    });
-}
