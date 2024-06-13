@@ -20,18 +20,30 @@ module.exports = {
         handler: async (req, res) => {
 
             try {
-
                 const user_id = req.user_id;
+                const limit = parseInt(req.query.limit); // Obter o limite do parâmetro de consulta, se fornecido
+    
+                // Configuração básica da consulta
+                let queryOptions = {
+                    order: [['id', 'DESC']], // Mais recentes primeiro
+                    include: [{ model: Favorite, as: "favorite", where: { '$favorite.user_id$': user_id }, required: false }]
+                };
+    
+                // Se o limite for fornecido, adicione
+                if (limit) {
+                    queryOptions.limit = limit;
+                }
     
                 // Busca e conta todos os registros passando os dados para paginação
-                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll({
-                    order: [['id', 'DESC']], //Mais recentes primeiro
-                    include: [{model: Favorite, as: "favorite", where: {'$favorite.user_id$': user_id}, required: false}]
-                });
-
-                let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
-                
-                return res.json({diagrams: result});
+                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll(queryOptions);
+    
+                let result = diagrams.map(item => ({
+                    ...item.dataValues,
+                    favorite: !!item.favorite.length,
+                    diagram_svg: FILES_PATH + item.diagram_svg
+                }));
+    
+                return res.json({ diagrams: result });
     
             } catch (error) {
                 return handleExceptions(error, res);
