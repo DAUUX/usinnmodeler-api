@@ -22,10 +22,12 @@ module.exports = {
             try {
                 const user_id = req.user_id;
                 const limit = parseInt(req.query.limit); // Obter o limite do parâmetro de consulta, se fornecido
+                const order = req.query.order || 'id'; // Obter a ordem do parâmetro de consulta, se fornecido, caso contrário, usar 'id'
+                const direction = req.query.direction || 'DESC'; // Direção da ordenação, padrão para 'DESC'
     
                 // Configuração consulta
                 let queryOptions = {
-                    order: [['updated_at', 'DESC']], //Mais recentes updated_at
+                    order: [[order, direction]], // Ordenar pela ordem fornecida e direção
                     include: [{ model: Favorite, as: "favorite", where: { '$favorite.user_id$': user_id }, required: false }]
                 };
     
