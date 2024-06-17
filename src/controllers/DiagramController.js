@@ -23,9 +23,9 @@ module.exports = {
                 const user_id = req.user_id;
                 const limit = parseInt(req.query.limit); // Obter o limite do parâmetro de consulta, se fornecido
     
-                // Configuração básica da consulta
+                // Configuração consulta
                 let queryOptions = {
-                    order: [['id', 'DESC']], // Mais recentes primeiro
+                    order: [['updated_at', 'DESC']], //Mais recentes updated_at
                     include: [{ model: Favorite, as: "favorite", where: { '$favorite.user_id$': user_id }, required: false }]
                 };
     
