@@ -52,7 +52,7 @@ module.exports = {
             }
             
         }
-    },
+    },    
 
     getAllShared: {
         handler: async (req, res) => {
@@ -76,7 +76,7 @@ module.exports = {
                         where: {'$favorite.user_id$': user_id}, 
                         required: false
                     }],
-                    order: [['id', 'DESC']] //Mais recentes primeiro
+                    order: [['id', 'DESC']] 
                 });
 
                 let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
@@ -107,7 +107,7 @@ module.exports = {
                         as: "favorite", 
                         where: {'$favorite.user_id$': user_id}
                     }],
-                    order: [['id', 'DESC']] //Mais recentes primeiro
+                    order: [['id', 'DESC']] 
                 });
 
                 let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
@@ -351,6 +351,60 @@ module.exports = {
                 }
                 return res.json({img: data.toString("base64"), format: img_format});
                 
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
+
+    getRecent: {
+        handler: async (req, res) => {
+            try {
+                const user_id = req.user_id;
+                const limit = parseInt(req.query.limit) || 10; // limite 
+                const order = req.query.order || 'updated_at'; // ordem 
+                const direction = req.query.direction || 'DESC'; // Direção 
+
+                const queryOptions = {
+                    order: [[order, direction]], 
+                    include: [{ 
+                                model: Favorite, 
+                                as: "favorite", 
+                                where: { '$favorite.user_id$': user_id }, 
+                                required: false 
+                            }]};
+                if (limit) {queryOptions.limit = limit;}
+
+                // Busca no banco
+                const [diagrams, diagramsshared] = await Promise.all([
+                    Diagram.scope({ method: ['byUser', user_id] }).findAll(queryOptions),
+                    Diagram.findAll({
+                        where: { '$collaboration.collaborator_id$': user_id },
+                        include: [{
+                                    model: Collaboration,
+                                    as: 'collaboration',
+                                    required: true
+                                },{
+                                    model: Favorite,
+                                    as: "favorite",
+                                    where: { '$favorite.user_id$': user_id },
+                                    required: false
+                                }],
+                                order: [['id', 'DESC']]
+                        })]);
+                // Combina os resultados
+                const combinedResults = [...diagrams, ...diagramsshared];
+                // Formatar os resultados
+                const formattedResults = combinedResults.map(item => ({
+                    ...item.dataValues,
+                    favorite: !!item.favorite.length,
+                    diagram_svg: FILES_PATH + item.diagram_svg
+                }));
+                // Ordenar o array 
+                formattedResults.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                // Limita
+                const resultOrder = limit ? formattedResults.slice(0, limit) : formattedResults;
+                return res.json({ diagrams: resultOrder });
             } catch (error) {
                 return handleExceptions(error, res);
             }
