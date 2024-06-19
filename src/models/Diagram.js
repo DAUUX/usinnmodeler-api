@@ -62,6 +62,7 @@ class Diagram extends Model {
 		this.belongsTo(models.User, { foreignKey: 'user_id', as: 'user'});
 		this.hasMany(models.Collaboration, { foreignKey: 'diagram_id', as: 'collaboration'});
         this.hasMany(models.Favorite, { foreignKey: 'diagram_id', as: 'favorite'});
+        this.hasMany(models.Notification, { foreignKey: 'diagram_id', as: 'notification'});
 	}
 
 }
