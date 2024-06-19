@@ -18,7 +18,7 @@ module.exports = {
             html: `
                 <p>Para redefinir sua senha de acesso ao USINN Modeler, entre no link abaixo e preencha o campo com a nova senha. Caso não tenha realizado esta solicitação, apenas ignore esta mensagem.</p>
             
-                <p> Link para redefinição de senha: <a href="${process.env.APP_URL}redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
+                <p> Link para redefinição de senha: <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
             `
         })
     },
