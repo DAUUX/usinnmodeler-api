@@ -30,6 +30,7 @@
     "pdfkit": "^0.15.0",
     "sequelize": "^6.37.3",
     "sharp": "^0.33.4",
+    "socket.io": "^4.7.5",
     "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
