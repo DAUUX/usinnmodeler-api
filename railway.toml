@@ -1,0 +1,5 @@
+[mounts]
+  imagens = {
+    name = "imagens"
+    path = "/app/imagens"
+  }
