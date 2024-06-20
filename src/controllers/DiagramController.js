@@ -11,7 +11,7 @@ const { pagination, handleExceptions } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? '../public/uploads/' : process.env.RAILWAY_VOLUME_MOUNT_PATH
+const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? '../public/uploads/' : process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
 const FILES_PATH = 'files/'
 
 module.exports = {
