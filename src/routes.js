@@ -40,6 +40,7 @@ routes.use('/user', userRoutes);
 const diagramRoutes = express.Router();
 diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
+diagramRoutes.get("/recent", DiagramController.getRecent.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
 diagramRoutes.get("/favorited", DiagramController.getAllFavorited.handler);
 diagramRoutes.post("/export", [ DiagramController.export.validations ], DiagramController.export.handler);
