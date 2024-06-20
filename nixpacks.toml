@@ -1,7 +1,2 @@
 [phases.setup]
 aptPkgs = ['...', 'fontconfig']
-[mounts]
-  imagens = {
-    name = "imagens"
-    path = "/app/imagens"
-  }
