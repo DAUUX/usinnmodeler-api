@@ -11,7 +11,7 @@ const { pagination, handleExceptions } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? '../public/uploads/' : '../app/imagens'
+const UPLOADS_FOLDER = '../public/uploads/'
 const FILES_PATH = 'files/'
 
 module.exports = {
