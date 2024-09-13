@@ -11,8 +11,8 @@ const { pagination, handleExceptions } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-// const UPLOADS_FOLDER = '../public/uploads/'
-const UPLOADS_FOLDER = process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
+const UPLOADS_FOLDER = '../public/uploads/'
+// const UPLOADS_FOLDER = process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
 const FILES_PATH = 'files/'
 
 module.exports = {
@@ -163,7 +163,7 @@ module.exports = {
                 
                 if (diagram_svg) {
     
-                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                    let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
                         return err
                     });
     
@@ -248,10 +248,10 @@ module.exports = {
                 
                 if (diagram_svg) {
                 
-                    if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
-                        fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
+                    if (fs.existsSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                        fs.unlinkSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg));
 
-                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                    let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
                         return err
                     });
     
@@ -417,7 +417,7 @@ module.exports = {
             try {
                 
                 const { filename } = req.params;
-                const filePath = path.join(UPLOADS_FOLDER, filename);
+                const filePath = path.join(__dirname, UPLOADS_FOLDER, filename);
 
                 if(fs.existsSync(filePath)) {
                     const svgContent = await fs.promises.readFile(filePath, 'utf-8');
