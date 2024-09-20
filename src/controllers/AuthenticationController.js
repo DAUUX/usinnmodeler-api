@@ -26,7 +26,6 @@ module.exports = {
         handler: async (req, res) => {
             
             try {
-
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) 
                     throw {name: 'RequestValidationError', errors};
