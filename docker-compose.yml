@@ -1,7 +1,7 @@
 services:
   api:
     container_name: usinnmodeler-api
-    image: node:16.4.2-alpine
+    image: node:20.3.0-alpine
     user: node
     working_dir: /home/app
     ports:

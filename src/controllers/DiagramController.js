@@ -1,4 +1,6 @@
 const sharp = require("sharp");
+const SVGtoPDF = require('svg-to-pdfkit');
+const PDFDocument = require('pdfkit');
 
 const { body, validationResult } = require('express-validator');
 const db = require("../database");
@@ -9,7 +11,7 @@ const { pagination, handleExceptions } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-const UPLOADS_FOLDER = '../public/uploads/'
+const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? path.join(__dirname, "../public/uploads/") : process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
 const FILES_PATH = 'files/'
 
 module.exports = {
@@ -18,25 +20,40 @@ module.exports = {
         handler: async (req, res) => {
 
             try {
-
                 const user_id = req.user_id;
+                const limit = parseInt(req.query.limit); // Obter o limite do parâmetro de consulta, se fornecido
+                const order = req.query.order || 'id'; // Obter a ordem do parâmetro de consulta, se fornecido, caso contrário, usar 'id'
+                const direction = req.query.direction || 'DESC'; // Direção da ordenação, padrão para 'DESC'
+    
+                // Configuração consulta
+                let queryOptions = {
+                    order: [[order, direction]], // Ordenar pela ordem fornecida e direção
+                    include: [{ model: Favorite, as: "favorite", where: { '$favorite.user_id$': user_id }, required: false }]
+                };
+    
+                // Se o limite for fornecido, adicione
+                if (limit) {
+                    queryOptions.limit = limit;
+                }
     
                 // Busca e conta todos os registros passando os dados para paginação
-                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll({
-                    order: [['id', 'DESC']], //Mais recentes primeiro
-                    include: [{model: Favorite, as: "favorite", where: {'$favorite.user_id$': user_id}, required: false}]
-                });
-
-                let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
-                
-                return res.json({diagrams: result});
+                const diagrams = await Diagram.scope({ method: ['byUser', user_id] }).findAll(queryOptions);
+    
+                let result = diagrams.map(item => ({
+                    ...item.dataValues,
+                    favorite: !!item.favorite.length,
+                    diagram_svg: FILES_PATH + item.diagram_svg
+                }));
+    
+                return res.json({ diagrams: result });
     
             } catch (error) {
+                console.log(error)
                 return handleExceptions(error, res);
             }
             
         }
-    },
+    },    
 
     getAllShared: {
         handler: async (req, res) => {
@@ -60,7 +77,7 @@ module.exports = {
                         where: {'$favorite.user_id$': user_id}, 
                         required: false
                     }],
-                    order: [['id', 'DESC']] //Mais recentes primeiro
+                    order: [['id', 'DESC']] 
                 });
 
                 let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
@@ -91,7 +108,7 @@ module.exports = {
                         as: "favorite", 
                         where: {'$favorite.user_id$': user_id}
                     }],
-                    order: [['id', 'DESC']] //Mais recentes primeiro
+                    order: [['id', 'DESC']] 
                 });
 
                 let result = diagrams.map(item => ({...item.dataValues, favorite: !!item.favorite.length, diagram_svg: FILES_PATH+item.diagram_svg}));
@@ -140,7 +157,24 @@ module.exports = {
                     edges,
                     nodes
                 }
-                const diagram = await Diagram.create({ name, data, user_id});
+                // const errors = validationResult(req);
+                // if (!errors.isEmpty()) 
+                //     throw {name: 'RequestValidationError', errors};
+
+                // const user_id = req.user_id;
+
+                // const { name, diagram_data, diagram_svg } = req.body;
+
+                // let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                
+                // if (diagram_svg) {
+    
+                //     let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                //         return err
+                //     });
+    
+                //     if (file_err) throw {name: 'FileWritingError', errors};
+                const diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
                 
                 return res.status(201).json({message: diagram});
             } catch (error) {
@@ -217,12 +251,12 @@ module.exports = {
                 
                 // if (diagram_svg) {
                 
-                //     if (fs.existsSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
-                //         fs.unlinkSync(path.join(__dirname, UPLOADS_FOLDER, diagram.diagram_svg));
+                    // if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                    //     fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
 
-                //     let file_err = fs.writeFile(path.join(__dirname, UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                //         return err
-                //     });
+                    // let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                    //     return err
+                    // });
     
                 //     if (file_err) throw {name: 'FileWritingError', errors};
                 // }
@@ -277,7 +311,7 @@ module.exports = {
     export: {
         validations: [
             body('svg').not().isEmpty().withMessage("SVG é necessário!"),
-            body("format").isInt({min: 1, max: 3}).withMessage("Formato inválido!")
+            body("format").isInt({min: 1, max: 4}).withMessage("Formato inválido!")
         ], 
         handler: async (req, res) => {
             
@@ -289,7 +323,7 @@ module.exports = {
 
                 const { svg, format } = req.body;
 
-                const formats = ["png", "jpeg", "webp"];
+                const formats = ["png", "jpeg", "webp", "pdf"];
                 let data = null;
 
                 let img_format = formats[format-1];
@@ -304,6 +338,23 @@ module.exports = {
                     case "webp":
                         data = await sharp(Buffer.from(svg)).webp().toBuffer();
                         break;
+                    case "pdf":
+                        data = await new Promise((resolve, reject) => {
+                                const pdfDoc = new PDFDocument();
+                                const buffers = [];
+                        
+                                pdfDoc.on('data', buffers.push.bind(buffers));
+                                pdfDoc.on('end', () => {
+                                    const pdfData = Buffer.concat(buffers);
+                                    resolve(pdfData);
+                                });
+                        
+                                pdfDoc.on('error', reject);
+                        
+                                SVGtoPDF(pdfDoc, svg, 0, 0);
+                                pdfDoc.end();
+                            });
+                        break;
                     default:
                         return res.status(400).json({ errors: [{msg: "Formato inválido!"}] });
                 }
@@ -312,6 +363,82 @@ module.exports = {
             } catch (error) {
                 return handleExceptions(error, res);
             }
+        }
+    },
+
+    getRecent: {
+        handler: async (req, res) => {
+            try {
+                const user_id = req.user_id;
+                const limit = parseInt(req.query.limit) || 10; // limite 
+                const order = req.query.order || 'updated_at'; // ordem 
+                const direction = req.query.direction || 'DESC'; // Direção 
+
+                const queryOptions = {
+                    order: [[order, direction]], 
+                    include: [{ 
+                                model: Favorite, 
+                                as: "favorite", 
+                                where: { '$favorite.user_id$': user_id }, 
+                                required: false 
+                            }]};
+                if (limit) {queryOptions.limit = limit;}
+
+                // Busca no banco
+                const [diagrams, diagramsshared] = await Promise.all([
+                    Diagram.scope({ method: ['byUser', user_id] }).findAll(queryOptions),
+                    Diagram.findAll({
+                        where: { '$collaboration.collaborator_id$': user_id },
+                        include: [{
+                                    model: Collaboration,
+                                    as: 'collaboration',
+                                    required: true
+                                },{
+                                    model: Favorite,
+                                    as: "favorite",
+                                    where: { '$favorite.user_id$': user_id },
+                                    required: false
+                                }],
+                                order: [['id', 'DESC']]
+                        })]);
+                // Combina os resultados
+                const combinedResults = [...diagrams, ...diagramsshared];
+                // Formatar os resultados
+                const formattedResults = combinedResults.map(item => ({
+                    ...item.dataValues,
+                    favorite: !!item.favorite.length,
+                    diagram_svg: FILES_PATH + item.diagram_svg
+                }));
+                // Ordenar o array 
+                formattedResults.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                // Limita
+                const resultOrder = limit ? formattedResults.slice(0, limit) : formattedResults;
+                return res.json({ diagrams: resultOrder });
+            } catch (error) {
+                console.log(error)
+                return handleExceptions(error, res);
+            }
+        }
+    },
+
+    getThumbnail: {
+        handler: async (req, res) => {
+            try {
+                
+                const { filename } = req.params;
+                const filePath = path.join(UPLOADS_FOLDER, filename);
+
+                if(fs.existsSync(filePath)) {
+                    const svgContent = await fs.promises.readFile(filePath, 'utf-8');
+                    return res.json({svgContent: svgContent});                
+                } else {
+                    return res.status(404).json({ error: 'Arquivo não encontrado' });
+                }
+    
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+            
         }
     }
 
