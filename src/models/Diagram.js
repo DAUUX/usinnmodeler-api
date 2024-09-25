@@ -32,10 +32,6 @@ class Diagram extends Model {
             is_shared: {
                 type: DataTypes.STRING,
                 allowNull: true,
-            },
-            data: {
-                type: DataTypes.STRING,
-                allowNull: true,
             }
         }, {
             scopes: {
