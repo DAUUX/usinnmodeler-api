@@ -45,9 +45,13 @@ module.exports = {
                 if (owned_diagram)
                     return res.json(owned_diagram);
 
+                const existingCollaboration = await Collaboration.findOne({
+                    where: { diagram_id, collaborator_id },
+                });
+
                 let collaborator = await Collaboration.findOrCreate({where: { diagram_id, collaborator_id }, defaults: { diagram_id, collaborator_id, permission}});
 
-                return res.json({collaborator: collaborator[0], diagram});
+                return res.json({collaborator: collaborator[0], diagram, existingCollaboration});
  
             } catch (error) {
                 return handleExceptions(error, res);

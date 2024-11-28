@@ -1,6 +1,7 @@
 const db = require("../database");
 const Notification = db.notification;
 const { handleExceptions } = require('../helpers');
+const { fn, col, literal } = db.Sequelize;
 
 module.exports = {
 
@@ -44,23 +45,45 @@ module.exports = {
     handler: async (req, res) => {
       try {
         const { user_id } = req.params;
-  
-        const diagrams = await Notification.findAll({
-          where: { 
+
+        const diagramsWithUnreadCount = await Notification.findAll({
+          attributes: [
+            'diagram_id',
+            [fn('COUNT', fn('IF', col('read'), null, col('id'))), 'unread_count'],
+            [fn('MAX', col('created_at')), 'most_recent'],
+          ],
+          where: {
             user_id: user_id,
           },
-          attributes: ['diagram_id', 'diagram_name'],
-          distinct: true,
+          group: ['diagram_id'],
+          order: [
+            [fn('COUNT', fn('IF', col('read'), null, col('id'))), 'DESC'],
+            [fn('MAX', col('created_at')), 'DESC'],
+          ],
+          raw: true,
         });
 
-        const uniqueDiagrams = [...new Map(diagrams.map(notification => [notification.diagram_id, notification])).values()];
-  
-        return res.json(uniqueDiagrams);
-  
+        const diagramsWithNames = await Promise.all(
+          diagramsWithUnreadCount.map(async (diagram) => {
+            const diagramInfo = await Notification.findOne({
+              where: { diagram_id: diagram.diagram_id },
+              attributes: ['diagram_name'],
+              order: [['created_at', 'DESC']],
+              raw: true,
+            });
+
+            return {
+              ...diagram,
+              diagram_name: diagramInfo ? diagramInfo.diagram_name : null,
+            };
+          })
+        );
+
+        return res.json(diagramsWithNames);
       } catch (error) {
         return handleExceptions(error, res);
       }
-    }
+    },
   },
   getNotificationDiagram: {
     handler: async (req, res) => {
