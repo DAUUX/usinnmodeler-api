@@ -14,6 +14,7 @@ const path = require('path');
 const UPLOADS_FOLDER = '../public/uploads/'
 const FILES_PATH = 'files/'
 
+
 module.exports = {
 
     getAll: {
@@ -409,6 +410,20 @@ module.exports = {
                 return handleExceptions(error, res);
             }
         }
-    }
+    },
+
+    getDiagramModels: {
+        handler: async (req, res) => {
+            try {
+                // Importa o arquivo JSON diretamente como objeto
+                const diagramas = require('../public/diagramModels/ModelosDiagramas.json');
+
+                // Retorna os diagramas carregados do JSON
+                return res.json({ diagrams: diagramas });
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
 
 }

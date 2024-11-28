@@ -8,7 +8,6 @@ const DiagramController = require("./controllers/DiagramController");
 const SharingController = require('./controllers/SharingController');
 const CollaborationController = require('./controllers/CollaborationController');
 const FavoriteController = require('./controllers/FavoriteController');
-const DiagramModelsController = require('./controllers/DiagramModelsController');
 
 routes.use(function (req, res, next) {
     res.header(
@@ -20,6 +19,7 @@ routes.use(function (req, res, next) {
     
 //Rotas de arquivos estáticos
 routes.use('/files', express.static(path.join(__dirname, 'public/uploads')))
+routes.use('/modelsfiles', express.static(path.join(__dirname, 'public/diagramModels')))
 
 // Rotas de autenticação
 routes.post("/signup", [ verifySignUp.checkDuplicateEmail, AuthController.signup.validations ], AuthController.signup.handler);
@@ -41,6 +41,7 @@ routes.use('/user', userRoutes);
 const diagramRoutes = express.Router();
 diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
+diagramRoutes.get("/diagramModels", DiagramController.getDiagramModels.handler);
 diagramRoutes.get("/recent", DiagramController.getRecent.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
 diagramRoutes.get("/favorited", DiagramController.getAllFavorited.handler);
@@ -79,12 +80,5 @@ favoriteRoutes.use([authJwt.verifyToken]);
 favoriteRoutes.post("/:diagram_id", FavoriteController.create.handler);
 favoriteRoutes.delete("/:diagram_id", FavoriteController.delete.handler);
 routes.use('/favorite', favoriteRoutes); 
-
-// Rotas Modelos de Diagrama
-const diagramModels = express.Router();
-diagramModels.use([authJwt.verifyToken])
-diagramModels.get("/diagramModels/getAll", DiagramModelsController.getAll.handler)
-//diagramModels.post("/:id", DiagramModelsController.create.handler); REMOVER
-//diagramModels.delete("/:id", DiagramModelsController.delete.handler); REFRESH
 
 module.exports = routes;
