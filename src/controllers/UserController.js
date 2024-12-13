@@ -29,6 +29,42 @@ module.exports = {
         }
     },
 
+    getIDForEmail: {
+        handler: async (req, res) => {
+            try {
+              const emails = req.query.emails;
+          
+              if (!emails) {
+                return res.status(400).json({ errors: [{ msg: "Emails são obrigatórios" }] });
+              }
+
+              const emailArray = Array.isArray(emails) ? emails : emails.split(',');
+          
+              if (!Array.isArray(emailArray) || emailArray.length === 0) {
+                return res.status(400).json({ errors: [{ msg: "Emails tem que estar em um array e não podem estar vazios" }] });
+              }
+          
+              const users = await User.findAll({
+                where: {
+                  email: emailArray
+                },
+                attributes: ['id']
+              });
+          
+              if (!users || users.length === 0) {
+                return res.status(404).json({ errors: [{ msg: "Usuário não encontrado" }] });
+              }
+          
+              const ids = users.map(user => user.id);
+          
+              return res.json(ids);
+          
+            } catch (error) {
+              return handleExceptions(error, res);
+            }
+          }
+      },
+
     update: {
         validations: [
             body('name').isLength({ min: 3, max: 100 }).withMessage("O nome deve ter entre 3 e 100 caracteres").not().isEmpty().withMessage("Preencha o campo nome").isAlpha("pt-BR", {ignore:" "}).withMessage("O nome não deve conter caracteres especiais"),
