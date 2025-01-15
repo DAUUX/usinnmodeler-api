@@ -31,12 +31,13 @@ io.on('connect', (socket) => {
         connectedUsers[userId] = socket.id;
     }
 
-    socket.on('send_notification', (user_ids) => {
+    socket.on('send_notification', (user_ids, diagram_id) => {
         if (Array.isArray(user_ids)) {
             user_ids.forEach((user_id) => {
                 const targetSocketId = connectedUsers[user_id];
                 if (targetSocketId) {
                     io.to(targetSocketId).emit('notification_received');
+                    io.to(targetSocketId).emit('component_refresh', {diagram_id});
                     io.to(targetSocketId).emit('notification_received_dashboard');
                 }
             });
@@ -44,6 +45,7 @@ io.on('connect', (socket) => {
             const targetSocketId = connectedUsers[user_ids];
             if (targetSocketId) {
                 io.to(targetSocketId).emit('notification_received');
+                io.to(targetSocketId).emit('component_refresh', {diagram_id});
                 io.to(targetSocketId).emit('notification_received_dashboard');
             }
         }
