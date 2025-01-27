@@ -3,6 +3,7 @@ const db = require("../database");
 const User = db.user;
 const bcrypt = require("bcryptjs");
 const { handleExceptions } = require('../helpers');
+const dns = require('dns');
 
 module.exports = {
 
@@ -99,6 +100,21 @@ module.exports = {
                     if(email_is_used){
                         return res.status(406).json({errors: [{msg: "O email já está sendo utilizado!"}]});
                     }
+                }
+
+                const domain = email.split('@')[1];
+                
+                const isValidDomain = await new Promise((resolve, reject) => {
+                    dns.resolveMx(domain, (err, addresses) => {
+                        if (err || !addresses || addresses.length === 0) {
+                            return resolve(false);
+                        }
+                        resolve(true);
+                    });
+                });
+
+                if (!isValidDomain) {
+                    return res.status(400).json({ errors: [{ msg: `O domínio '${domain}' não é válido` }] });
                 }
 
                 const updated_user = await User.update({ name, email, birthday, gender, company, role, avatar }, {
