@@ -35,6 +35,11 @@ userRoutes.get("/", UserController.get.handler);
 userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
 userRoutes.put("/change-password", [UserController.changePassword.validations], UserController.changePassword.handler);
 userRoutes.delete("/", UserController.delete.handler);
+
+userRoutes.post("/preferences", UserController.setUserPreferences.handler)
+userRoutes.get("/preferences", UserController.getUserPreferences.handler)
+userRoutes.delete("/preferences", UserController.deleteUserPreferences.handler)
+
 routes.use('/user', userRoutes); 
 
 // Rotas de diagrama
@@ -80,5 +85,6 @@ favoriteRoutes.use([authJwt.verifyToken]);
 favoriteRoutes.post("/:diagram_id", FavoriteController.create.handler);
 favoriteRoutes.delete("/:diagram_id", FavoriteController.delete.handler);
 routes.use('/favorite', favoriteRoutes); 
+
 
 module.exports = routes;

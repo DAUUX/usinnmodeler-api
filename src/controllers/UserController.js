@@ -160,6 +160,94 @@ module.exports = {
             }
             
         }
-    }
+    },
+
+    setUserPreferences: {
+        handler: async (req, res) => {
+            try {
+                const id = req.user_id; // O id do usuário, assumindo que você já tenha essa informação.
+                const { dados } = req.body; // Captura as informações de "key" e "value" do corpo da requisição.
+        
+                const user = await User.findByPk(id); // Encontra o usuário no banco de dados.
+                if (!user) return res.status(404).send('Usuário não encontrado.');
+        
+                // Atualiza ou adiciona a chave no dicionário de preferências.
+
+                let preferences = user.preferences ? JSON.parse(user.preferences) : {};
+
+                let preferencess = { ...preferences, ...dados };
+
+                // Atualiza as preferências do usuário no banco de dados
+                user.preferences = preferencess;
+                await user.save()
+    
+                return res.status(200).send(dados);
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
+    
+    
+    getUserPreferences: {
+        handler: async (req, res) => {
+            try {
+                const id = req.user_id;
+                const { key } = req.query; // Chave enviada via query string
+    
+                // Obtém as preferências do usuário
+                const user = await User.findByPk(id);
+                if (!user) return res.status(404).send('Usuário não encontrado.');
+    
+                let preferences = user.preferences ? JSON.parse(user.preferences) : {};
+    
+                // Se não foi passada uma chave, retorna todas as preferências
+                if (!key) {
+                    return res.status(200).json(preferences);
+                }
+    
+                // Se a chave foi fornecida, retorna a preferência correspondente
+                const value = preferences[key];
+    
+                if (value === undefined) {
+                    return res.status(404).send('Preferência não encontrada.');
+                }
+    
+                return res.status(200).json({ key, value });
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        },
+    },
+    
+    
+    deleteUserPreferences: {
+        handler: async (req, res) => {
+        try {
+            const id = req.user_id;
+            const { key } = req.body;
+    
+            // Remove a chave do dicionário de preferências
+            const user = await User.findByPk(id);
+            if (!user) return res.status(404).send('Usuário não encontrado.');
+    
+            const preferences = user.preferences || {};
+            if (!(key in preferences)) {
+            return res.status(404).send('Preferência não encontrada.');
+            }
+    
+            delete preferences[key];
+            await user.update({ preferences });
+    
+            return res.status(200).send('Preferência excluída com sucesso!');
+        } catch (error) {
+            return handleExceptions(error, res);
+        }
+        },
+    },
+    
+    
+    
+
 
 }
