@@ -38,7 +38,7 @@ userRoutes.delete("/", UserController.delete.handler);
 
 userRoutes.post("/preferences", UserController.setUserPreferences.handler)
 userRoutes.get("/preferences", UserController.getUserPreferences.handler)
-userRoutes.delete("/preferences", UserController.deleteUserPreferences.handler)
+userRoutes.delete("/preferences", UserController.deleteUserModelsOcultosPreferences.handler)
 
 routes.use('/user', userRoutes); 
 

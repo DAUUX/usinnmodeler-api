@@ -221,30 +221,36 @@ module.exports = {
     },
     
     
-    deleteUserPreferences: {
+    deleteUserModelsOcultosPreferences: {
         handler: async (req, res) => {
-        try {
-            const id = req.user_id;
-            const { key } = req.body;
+            try {
+                const id = req.user_id; // O ID do usuário, assumindo que já tenha essa informação.
+                console.log(id)
+                const user = await User.findByPk(id); // Encontra o usuário no banco de dados.
     
-            // Remove a chave do dicionário de preferências
-            const user = await User.findByPk(id);
-            if (!user) return res.status(404).send('Usuário não encontrado.');
+                if (!user) return res.status(404).send('Usuário não encontrado.');
     
-            const preferences = user.preferences || {};
-            if (!(key in preferences)) {
-            return res.status(404).send('Preferência não encontrada.');
+                let preferences = user.preferences ? JSON.parse(user.preferences) : {};
+                
+                // Verifica se cada modelo tem o campo "oculto" antes de alterá-lo
+                Object.keys(preferences).forEach(key => {
+                    if (preferences[key].hasOwnProperty('oculto')) {
+                        preferences[key].oculto = "false";
+                    }
+                });
+
+                // Salva as preferências atualizadas no banco
+                user.preferences = (preferences);
+                await user.save();
+    
+                return res.json({ message: "Preferências atualizadas com sucesso" });
+    
+            } catch (error) {
+                return handleExceptions(error, res);
             }
-    
-            delete preferences[key];
-            await user.update({ preferences });
-    
-            return res.status(200).send('Preferência excluída com sucesso!');
-        } catch (error) {
-            return handleExceptions(error, res);
-        }
         },
     },
+    
     
     
     
