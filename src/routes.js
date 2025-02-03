@@ -19,6 +19,7 @@ routes.use(function (req, res, next) {
     
 //Rotas de arquivos estáticos
 routes.use('/files', express.static(path.join(__dirname, 'public/uploads')))
+routes.use('/modelsfiles', express.static(path.join(__dirname, 'public/diagramModels')))
 
 // Rotas de autenticação
 routes.post("/signup", [ verifySignUp.checkDuplicateEmail, AuthController.signup.validations ], AuthController.signup.handler);
@@ -34,12 +35,18 @@ userRoutes.get("/", UserController.get.handler);
 userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
 userRoutes.put("/change-password", [UserController.changePassword.validations], UserController.changePassword.handler);
 userRoutes.delete("/", UserController.delete.handler);
+
+userRoutes.post("/preferences", UserController.setUserPreferences.handler)
+userRoutes.get("/preferences", UserController.getUserPreferences.handler)
+userRoutes.delete("/preferences", UserController.deleteUserModelsOcultosPreferences.handler)
+
 routes.use('/user', userRoutes); 
 
 // Rotas de diagrama
 const diagramRoutes = express.Router();
 diagramRoutes.use([authJwt.verifyToken]);
 diagramRoutes.get("/", DiagramController.getAll.handler);
+diagramRoutes.get("/diagramModels", DiagramController.getDiagramModels.handler);
 diagramRoutes.get("/recent", DiagramController.getRecent.handler);
 diagramRoutes.get("/shared", DiagramController.getAllShared.handler);
 diagramRoutes.get("/favorited", DiagramController.getAllFavorited.handler);
@@ -79,5 +86,6 @@ favoriteRoutes.use([authJwt.verifyToken]);
 favoriteRoutes.post("/:diagram_id", FavoriteController.create.handler);
 favoriteRoutes.delete("/:diagram_id", FavoriteController.delete.handler);
 routes.use('/favorite', favoriteRoutes); 
+
 
 module.exports = routes;

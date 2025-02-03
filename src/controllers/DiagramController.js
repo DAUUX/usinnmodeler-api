@@ -14,6 +14,7 @@ const path = require('path');
 const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? path.join(__dirname, "../public/uploads/") : process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
 const FILES_PATH = 'files/'
 
+
 module.exports = {
 
     getAll: {
@@ -149,33 +150,34 @@ module.exports = {
             body('name').isLength({ min: 3, max: 255 }).withMessage("O nome deve ter entre 3 e 255 caracteres").not().isEmpty().withMessage("Preencha o campo nome")
         ], 
         handler: async (req, res) => {
-
+            let diagram
             try {
                 const { user_id } = req;
-                const { name, edges, nodes } = req.body;
+                const { name, edges, nodes, diagram_data } = req.body;
                 const data = {
                     edges,
                     nodes
                 }
-                // const errors = validationResult(req);
-                // if (!errors.isEmpty()) 
-                //     throw {name: 'RequestValidationError', errors};
 
-                // const user_id = req.user_id;
+                if(typeof diagram_data === 'string'){
+                    const fixedJson = diagram_data.replace(/([{,])\s*'([^']+)'\s*:/g, '$1"$2":') // Chaves
+                    .replace(/:\s*'([^']+)'/g, ':"$1"'); // Valores
 
-                // const { name, diagram_data, diagram_svg } = req.body;
+                    const parsedData = typeof diagram_data === 'string' 
+                    ? JSON.parse(fixedJson) 
+                    : diagram_data;
 
-                // let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                    const data = {
+                    edges: parsedData.edges || [],
+                    nodes: parsedData.nodes || []
+                    };
+                    console.log("\n")
+                    diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
+                    console.log(diagram)
                 
-                // if (diagram_svg) {
-    
-                //     let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                //         return err
-                //     });
-    
-                //     if (file_err) throw {name: 'FileWritingError', errors};
-                const diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
-                
+                }else{
+                diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
+                }
                 return res.status(201).json({message: diagram});
             } catch (error) {
                 console.log(error)
@@ -440,6 +442,20 @@ module.exports = {
             }
             
         }
-    }
+    },
+
+    getDiagramModels: {
+        handler: async (req, res) => {
+            try {
+                // Importa o arquivo JSON diretamente como objeto
+                const diagramas = require('../public/diagramModels/ModelosDiagramas.json');
+
+                // Retorna os diagramas carregados do JSON
+                return res.json({ diagrams: diagramas });
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
 
 }

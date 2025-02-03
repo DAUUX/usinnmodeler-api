@@ -118,6 +118,18 @@ class User extends Model {
                     max:4
                 }
             },
+            preferences: {
+                type: DataTypes.JSON, // Define o tipo como JSON para armazenar o dicionário
+                allowNull: true, // Permite valores nulos
+                validate: {
+                    isValidJson(value) {
+                        if (value !== null && typeof value !== 'object') {
+                            throw new Error('As preferências devem ser um objeto JSON válido.');
+                        }
+                    }
+                },
+                defaultValue: {} // Define o valor padrão como um objeto vazio
+            }
         }, {
             sequelize: connection,
             tableName: 'user',
