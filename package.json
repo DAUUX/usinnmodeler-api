@@ -19,22 +19,22 @@
   },
   "homepage": "https://github.com/DAUUX/usinnmodeler-api#readme",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "express-validator": "^7.2.0",
+    "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.11.5",
-    "nodemailer": "^6.9.16",
-    "pdfkit": "^0.15.1",
+    "mysql2": "^3.12.0",
+    "nodemailer": "^6.10.0",
+    "pdfkit": "^0.16.0",
     "sequelize": "^6.37.5",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.1",
     "svg-to-pdfkit": "^0.1.8"
   },
   "devDependencies": {
-    "nodemon": "^3.1.7",
+    "nodemon": "^3.1.9",
     "sequelize-cli": "^6.6.2"
   }
 }
