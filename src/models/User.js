@@ -140,6 +140,7 @@ class User extends Model {
 
 	static associate(models) {
 		this.hasMany(models.Diagram, { foreignKey: 'user_id', as: 'user'});
+        this.hasMany(models.Notification, { foreignKey: 'user_id', as: 'notification'});
 	}
 
 }

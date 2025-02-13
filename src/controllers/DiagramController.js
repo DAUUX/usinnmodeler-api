@@ -49,7 +49,6 @@ module.exports = {
                 return res.json({ diagrams: result });
     
             } catch (error) {
-                console.log(error)
                 return handleExceptions(error, res);
             }
             
@@ -132,7 +131,7 @@ module.exports = {
                 const user_id = req.user_id;
     
                 const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration] }).findByPk(id);
-                
+
                 if (!diagram) { return res.status(404).json({errors: [{msg: "Diagrama não encontrado"}]}); }
     
                 return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
@@ -144,7 +143,6 @@ module.exports = {
         }
     },
 
-    
     create: {
         validations: [
             body('name').isLength({ min: 3, max: 255 }).withMessage("O nome deve ter entre 3 e 255 caracteres").not().isEmpty().withMessage("Preencha o campo nome")
@@ -180,7 +178,6 @@ module.exports = {
                 }
                 return res.status(201).json({message: diagram});
             } catch (error) {
-                console.log(error)
                 return handleExceptions(error, res);
             }
         }
@@ -237,7 +234,7 @@ module.exports = {
 
                 const user_id = req.user_id;
                 const { id } = req.params;
-                const { name, edges, nodes } = req.body;
+                const { name, diagram_data, diagram_svg } = req.body;
 
                 const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id);             
 
@@ -249,28 +246,23 @@ module.exports = {
 
                 if (collaborator && collaborator.permission == 1) throw {errors};
                
-                // let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
                 
-                // if (diagram_svg) {
+                if (diagram_svg) {
                 
-                    // if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
-                    //     fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
+                    if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                        fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
 
-                    // let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                    //     return err
-                    // });
+                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                        return err
+                    });
     
-                //     if (file_err) throw {name: 'FileWritingError', errors};
-                // }
-
-                const data = {
-                    edges,
-                    nodes
+                    if (file_err) throw {name: 'FileWritingError', errors};
                 }
 
-                diagram.update({ name, data: JSON.stringify(data) }, { where: { id } });
+                diagram.update({ name, diagram_data, diagram_svg: diagram_svg ? file_name : diagram.diagram_svg }, { where: { id } });
 
-                return res.json({...diagram.dataValues });
+                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
 
             } catch (error) {
                 return handleExceptions(error, res);
@@ -417,7 +409,6 @@ module.exports = {
                 const resultOrder = limit ? formattedResults.slice(0, limit) : formattedResults;
                 return res.json({ diagrams: resultOrder });
             } catch (error) {
-                console.log(error)
                 return handleExceptions(error, res);
             }
         }

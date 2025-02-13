@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const _pick = require("lodash/pick");
 const { handleExceptions } = require('../helpers');
 const { resetPasswordMail } = require('../config/mail');
+const dns = require('dns');
 
 
 module.exports = {
@@ -26,11 +27,27 @@ module.exports = {
         handler: async (req, res) => {
             
             try {
+
                 const errors = validationResult(req);
                 if (!errors.isEmpty()) 
                     throw {name: 'RequestValidationError', errors};
 
                 const { name, email, password, birthday, gender, company, role } = req.body;
+                
+                const domain = email.split('@')[1];
+
+                const isValidDomain = await new Promise((resolve, reject) => {
+                    dns.resolveMx(domain, (err, addresses) => {
+                        if (err || !addresses || addresses.length === 0) {
+                            return resolve(false);
+                        }
+                        resolve(true);
+                    });
+                });
+
+                if (!isValidDomain) {
+                    return res.status(400).json({ errors: [{ msg: `O domínio '${domain}' não é válido` }] });
+                }
 
                 const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role, avatar:1 });
                 return res.json(_pick(user, ["name", "email"]));

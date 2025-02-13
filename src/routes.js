@@ -8,6 +8,7 @@ const DiagramController = require("./controllers/DiagramController");
 const SharingController = require('./controllers/SharingController');
 const CollaborationController = require('./controllers/CollaborationController');
 const FavoriteController = require('./controllers/FavoriteController');
+const NotificationController = require('./controllers/NotificationController');
 
 routes.use(function (req, res, next) {
     res.header(
@@ -32,6 +33,7 @@ const userRoutes = express.Router();
 userRoutes.use([authJwt.verifyToken]);
 userRoutes.post("/check-password", [UserController.checkPassord.validations], UserController.checkPassord.handler)
 userRoutes.get("/", UserController.get.handler);
+userRoutes.get("/idForEmail", UserController.getIDForEmail.handler)
 userRoutes.put("/", [UserController.update.validations], UserController.update.handler);
 userRoutes.put("/change-password", [UserController.changePassword.validations], UserController.changePassword.handler);
 userRoutes.delete("/", UserController.delete.handler);
@@ -87,5 +89,16 @@ favoriteRoutes.post("/:diagram_id", FavoriteController.create.handler);
 favoriteRoutes.delete("/:diagram_id", FavoriteController.delete.handler);
 routes.use('/favorite', favoriteRoutes); 
 
+// Rotas de notificações
+const notificationRoutes = express.Router();
+notificationRoutes.use([authJwt.verifyToken]);
+notificationRoutes.get("/:user_id", NotificationController.get.handler);
+notificationRoutes.get("/count/:user_id", NotificationController.getCount.handler);
+notificationRoutes.get("/diagrams/:user_id", NotificationController.getDiagrams.handler)
+notificationRoutes.get("/notificationDiagram/:user_id/:diagram_id", NotificationController.getNotificationDiagram.handler)
+notificationRoutes.post("/", NotificationController.create.handler)
+notificationRoutes.put("/:id", NotificationController.updateRead.handler)
+notificationRoutes.delete("/:id", NotificationController.delete.handler);
+routes.use('/notification', notificationRoutes)
 
 module.exports = routes;

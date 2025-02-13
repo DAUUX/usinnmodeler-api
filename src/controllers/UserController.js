@@ -3,6 +3,7 @@ const db = require("../database");
 const User = db.user;
 const bcrypt = require("bcryptjs");
 const { handleExceptions } = require('../helpers');
+const dns = require('dns');
 
 module.exports = {
 
@@ -28,6 +29,42 @@ module.exports = {
             
         }
     },
+
+    getIDForEmail: {
+        handler: async (req, res) => {
+            try {
+              const emails = req.query.emails;
+          
+              if (!emails) {
+                return res.status(400).json({ errors: [{ msg: "Emails são obrigatórios" }] });
+              }
+
+              const emailArray = Array.isArray(emails) ? emails : emails.split(',');
+          
+              if (!Array.isArray(emailArray) || emailArray.length === 0) {
+                return res.status(400).json({ errors: [{ msg: "Emails tem que estar em um array e não podem estar vazios" }] });
+              }
+          
+              const users = await User.findAll({
+                where: {
+                  email: emailArray
+                },
+                attributes: ['id']
+              });
+          
+              if (!users || users.length === 0) {
+                return res.status(404).json({ errors: [{ msg: "Usuário não encontrado" }] });
+              }
+          
+              const ids = users.map(user => user.id);
+          
+              return res.json(ids);
+          
+            } catch (error) {
+              return handleExceptions(error, res);
+            }
+          }
+      },
 
     update: {
         validations: [
@@ -63,6 +100,21 @@ module.exports = {
                     if(email_is_used){
                         return res.status(406).json({errors: [{msg: "O email já está sendo utilizado!"}]});
                     }
+                }
+
+                const domain = email.split('@')[1];
+                
+                const isValidDomain = await new Promise((resolve, reject) => {
+                    dns.resolveMx(domain, (err, addresses) => {
+                        if (err || !addresses || addresses.length === 0) {
+                            return resolve(false);
+                        }
+                        resolve(true);
+                    });
+                });
+
+                if (!isValidDomain) {
+                    return res.status(400).json({ errors: [{ msg: `O domínio '${domain}' não é válido` }] });
                 }
 
                 const updated_user = await User.update({ name, email, birthday, gender, company, role, avatar }, {
