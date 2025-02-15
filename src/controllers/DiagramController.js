@@ -234,7 +234,7 @@ module.exports = {
 
                 const user_id = req.user_id;
                 const { id } = req.params;
-                const { name, diagram_data, diagram_svg } = req.body;
+                const { name, edges, nodes } = req.body;
 
                 const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id);             
 
@@ -246,23 +246,28 @@ module.exports = {
 
                 if (collaborator && collaborator.permission == 1) throw {errors};
                
-                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                // let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
                 
-                if (diagram_svg) {
+                // if (diagram_svg) {
                 
-                    if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
-                        fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
+                    // if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                    //     fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
 
-                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                        return err
-                    });
+                    // let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                    //     return err
+                    // });
     
-                    if (file_err) throw {name: 'FileWritingError', errors};
+                //     if (file_err) throw {name: 'FileWritingError', errors};
+                // }
+
+                const data = {
+                    edges,
+                    nodes
                 }
 
-                diagram.update({ name, diagram_data, diagram_svg: diagram_svg ? file_name : diagram.diagram_svg }, { where: { id } });
+                diagram.update({ name, data: JSON.stringify(data) }, { where: { id } });
 
-                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
+                return res.json({...diagram.dataValues });
 
             } catch (error) {
                 return handleExceptions(error, res);
