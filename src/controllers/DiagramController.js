@@ -14,6 +14,7 @@ const path = require('path');
 const UPLOADS_FOLDER = process.env.APP_URL == 'http://localhost:3000' ? path.join(__dirname, "../public/uploads/") : process.env.RAILWAY_VOLUME_MOUNT_PATH + '/'
 const FILES_PATH = 'files/'
 
+
 module.exports = {
 
     getAll: {
@@ -147,33 +148,35 @@ module.exports = {
             body('name').isLength({ min: 3, max: 255 }).withMessage("O nome deve ter entre 3 e 255 caracteres").not().isEmpty().withMessage("Preencha o campo nome")
         ], 
         handler: async (req, res) => {
-            
+            let diagram
             try {
-
-                const errors = validationResult(req);
-                if (!errors.isEmpty()) 
-                    throw {name: 'RequestValidationError', errors};
-
-                const user_id = req.user_id;
-
-                const { name, diagram_data, diagram_svg } = req.body;
-
-                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
-                
-                if (diagram_svg) {
-    
-                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                        return err
-                    });
-    
-                    if (file_err) throw {name: 'FileWritingError', errors};
-
+                const { user_id } = req;
+                const { name, edges, nodes, diagram_data } = req.body;
+                const data = {
+                    edges,
+                    nodes
                 }
 
-                const diagram = await Diagram.create({ name, diagram_data, user_id, diagram_svg: diagram_svg ? file_name : ''});
+                if(typeof diagram_data === 'string'){
+                    const fixedJson = diagram_data.replace(/([{,])\s*'([^']+)'\s*:/g, '$1"$2":') // Chaves
+                    .replace(/:\s*'([^']+)'/g, ':"$1"'); // Valores
 
-                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
+                    const parsedData = typeof diagram_data === 'string' 
+                    ? JSON.parse(fixedJson) 
+                    : diagram_data;
 
+                    const data = {
+                    edges: parsedData.edges || [],
+                    nodes: parsedData.nodes || []
+                    };
+                    console.log("\n")
+                    diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
+                    console.log(diagram)
+                
+                }else{
+                diagram = await Diagram.create({ name, data: JSON.stringify(data), diagram_data: '', user_id});
+                }
+                return res.status(201).json({message: diagram});
             } catch (error) {
                 return handleExceptions(error, res);
             }
@@ -231,7 +234,7 @@ module.exports = {
 
                 const user_id = req.user_id;
                 const { id } = req.params;
-                const { name, diagram_data, diagram_svg } = req.body;
+                const { name, edges, nodes } = req.body;
 
                 const diagram = await Diagram.scope({ method: ['byOwnerOrCollaborator', user_id, Collaboration]}).findByPk(id);             
 
@@ -243,23 +246,28 @@ module.exports = {
 
                 if (collaborator && collaborator.permission == 1) throw {errors};
                
-                let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
+                // let file_name = Math.random().toString(36).slice(2, 12)+'.svg';
                 
-                if (diagram_svg) {
+                // if (diagram_svg) {
                 
-                    if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
-                        fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
+                    // if (fs.existsSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg)) && diagram.diagram_svg)
+                    //     fs.unlinkSync(path.join(UPLOADS_FOLDER, diagram.diagram_svg));
 
-                    let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
-                        return err
-                    });
+                    // let file_err = fs.writeFile(path.join(UPLOADS_FOLDER, file_name), diagram_svg,  function (err) {
+                    //     return err
+                    // });
     
-                    if (file_err) throw {name: 'FileWritingError', errors};
+                //     if (file_err) throw {name: 'FileWritingError', errors};
+                // }
+
+                const data = {
+                    edges,
+                    nodes
                 }
 
-                diagram.update({ name, diagram_data, diagram_svg: diagram_svg ? file_name : diagram.diagram_svg }, { where: { id } });
+                diagram.update({ name, data: JSON.stringify(data) }, { where: { id } });
 
-                return res.json({...diagram.dataValues, diagram_svg: FILES_PATH+diagram.diagram_svg});
+                return res.json({...diagram.dataValues });
 
             } catch (error) {
                 return handleExceptions(error, res);
@@ -430,6 +438,20 @@ module.exports = {
             }
             
         }
-    }
+    },
+
+    getDiagramModels: {
+        handler: async (req, res) => {
+            try {
+                // Importa o arquivo JSON diretamente como objeto
+                const diagramas = require('../public/diagramModels/ModelosDiagramas.json');
+
+                // Retorna os diagramas carregados do JSON
+                return res.json({ diagrams: diagramas });
+            } catch (error) {
+                return handleExceptions(error, res);
+            }
+        }
+    },
 
 }
