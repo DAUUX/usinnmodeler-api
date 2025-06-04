@@ -58,7 +58,7 @@ module.exports = {
                     throw {name: 'InvalidEmailError', errors};
                 }                
                 
-                const { link, usersInvited } = req.body;
+                const { link, usersInvited, messages } = req.body;
                 const user_id = req.user_id;
                 const { diagram_id } = req.params;  
                          
@@ -75,7 +75,7 @@ module.exports = {
                     } else if(userInvited.permission == 1){
                         (async () => {
                             const ownerOfDiagram = await User.findOne({raw: true, where: {id: user_id}});  
-                            await sendLinkMail(userInvited.email, link.reader, ownerOfDiagram.name);
+                            await sendLinkMail(userInvited.email, link.reader, ownerOfDiagram.name, messages);
                         })()
                     }
                     

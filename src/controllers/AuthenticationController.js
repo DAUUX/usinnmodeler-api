@@ -118,7 +118,7 @@ module.exports = {
                 if (!errors.isEmpty()) 
                     throw {name: 'RequestValidationError', errors};
 
-                const { email } = req.body;
+                const { email, messages } = req.body;
 
                 const user = await User.findOne({
                     where: {email}
@@ -131,7 +131,7 @@ module.exports = {
 
                 let recover_token = await RecoverToken.findOrCreate({where: { user_id: user.id }, defaults: { token: token, user_id: user.id }})
 
-                await resetPasswordMail(user.email, recover_token[0].token);
+                await resetPasswordMail(user.email, recover_token[0].token, messages);
 
                 return res.status(200).send("O email com as instruções para recuperação de senha foi enviado");
 
