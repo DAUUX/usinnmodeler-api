@@ -18,7 +18,7 @@ module.exports = {
             html: `
                 <p>${messages.body}</p>
             
-                <p> ${messages.link}: <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
+                <p> ${messages.link} <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
             `
         })
     },
@@ -30,7 +30,7 @@ module.exports = {
             html: `
                 <p> ${messages.body} ${username}.</p>
             
-                <p> ${messages.link} <a href="${link}">Abrir link</a></p>
+                <p> ${messages.link} <a href="${link}">"${messages.openLink}"</a></p>
             `
         })
     }
