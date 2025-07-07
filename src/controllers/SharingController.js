@@ -70,7 +70,7 @@ module.exports = {
                     if(userInvited.permission == 2){
                         (async () => {
                             const ownerOfDiagram = await User.findOne({raw: true, where: {id: user_id}});  
-                            await sendLinkMail(userInvited.email, link.reader, ownerOfDiagram.name, messages);
+                            await sendLinkMail(userInvited.email, link.editor, ownerOfDiagram.name, messages);
                         })()
                     } else if(userInvited.permission == 1){
                         (async () => {
