@@ -12,11 +12,23 @@ module.exports = {
 
         const notifications = await Notification.findAll({
           where: { user_id: user_id },
-          attributes: ['id', 'user_id', 'diagram_id', 'diagram_name', 'type', 'message', 'read', 'created_at'],
+          attributes: [
+            'id',
+            'user_id',
+            'diagram_id',
+            'diagram_name',
+            'type',
+            'message_key',
+            'message_variables',
+            'read',
+            'created_at'
+          ],
           order: [['created_at', 'DESC']]
         });
 
-        if (!notifications) { return res.status(404).json({errors: [{msg: "Usuário não encontrado em notification"}]}); }
+        if (!notifications) {
+          return res.status(404).json({ errors: [{ msg: "Usuário não encontrado em notification" }] });
+        }
 
         return res.json(notifications);
 
@@ -88,23 +100,33 @@ module.exports = {
   getNotificationDiagram: {
     handler: async (req, res) => {
       try {
-        const {user_id, diagram_id} = req.params;
-  
+        const { user_id, diagram_id } = req.params;
+
         const notifications = await Notification.findAll({
           where: { 
             user_id: user_id,
             diagram_id: diagram_id
           },
-          attributes: ['id', 'user_id', 'diagram_id', 'diagram_name', 'type', 'message', 'read', 'created_at'],
+          attributes: [
+            'id',
+            'user_id',
+            'diagram_id',
+            'diagram_name',
+            'type',
+            'message_key',
+            'message_variables',
+            'read',
+            'created_at'
+          ],
           order: [['created_at', 'DESC']]
         });
-  
+
         if (notifications.length === 0) {
           return res.status(404).json({ errors: [{ msg: "Nenhuma notificação encontrada" }] });
         }
-  
+
         return res.json(notifications);
-  
+
       } catch (error) {
         return handleExceptions(error, res);
       }    
@@ -113,7 +135,16 @@ module.exports = {
   create: {
     handler: async (req, res) => {
       try {
-        const { user_id, diagram_id, diagram_name, type, message } = req.body;
+        const { user_id, diagram_id, diagram_name, type, message_key, message_variables } = req.body;
+
+        if (!message_key || !message_variables) {
+          return res.status(422).json({
+            errors: [
+              { msg: 'Notification.message_key cannot be null' },
+              { msg: 'Notification.message_variables cannot be null' }
+            ]
+          });
+        }
 
         if (Array.isArray(user_id)) {
           const notifications = [];
@@ -124,7 +155,8 @@ module.exports = {
               diagram_id,
               diagram_name,
               type,
-              message,
+              message_key,
+              message_variables,
               read: 0
             });
             notifications.push(notification);
@@ -138,12 +170,14 @@ module.exports = {
             diagram_id,
             diagram_name,
             type,
-            message,
+            message_key,
+            message_variables,
             read: 0
           });
 
           return res.status(201).json(notification);
         }
+
       } catch (error) {
         return handleExceptions(error, res);
       }
