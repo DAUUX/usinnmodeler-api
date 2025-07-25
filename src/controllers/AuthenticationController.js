@@ -49,7 +49,7 @@ module.exports = {
                     return res.status(400).json({ errors: [{ msg: `O domínio '${domain}' não é válido` }] });
                 }
 
-                const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role, avatar:1 });
+                const user = await User.create({ name, email, password: bcrypt.hashSync(password, 8), birthday, gender, company, role, avatar:1, preferences: null });
                 return res.json(_pick(user, ["name", "email"]));
 
             } catch (error) {
