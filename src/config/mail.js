@@ -10,27 +10,27 @@ require('dotenv').config()
     })
 
 module.exports = {
-    resetPasswordMail: async (to, token)=> {
+    resetPasswordMail: async (to, token, messages)=> {
         return await mailTransporter.sendMail({
             from: process.env.MAIL_USER,
             to,
-            subject: 'USINN Modeler - Recuperação de senha',
+            subject: `USINN Modeler - ${messages.subject}`,
             html: `
-                <p>Para redefinir sua senha de acesso ao USINN Modeler, entre no link abaixo e preencha o campo com a nova senha. Caso não tenha realizado esta solicitação, apenas ignore esta mensagem.</p>
+                <p>${messages.body}</p>
             
-                <p> Link para redefinição de senha: <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
+                <p> ${messages.link} <a href="${process.env.APP_URL}/redefinir-senha/${token}">${process.env.APP_URL}redefinir-senha/${token}</a></p>
             `
         })
     },
-    sendLinkMail: async (to, link, username)=>{
+    sendLinkMail: async (to, link, username, messages)=>{
         return await mailTransporter.sendMail({
             from: process.env.MAIL_USER,
             to,
-            subject: 'USINN Modeler - Link de diagrama compartilhado',
+            subject: `USINN Modeler - ${messages.subject}`,
             html: `
-                <p> Você recebeu um convite para editar o diagrama de ${username}.</p>
+                <p> ${messages.body} ${username}.</p>
             
-                <p> Link do diagrama: <a href="${link}">Abrir link</a></p>
+                <p> ${messages.link} <a href="${link}">"${messages.openLink}"</a></p>
             `
         })
     }

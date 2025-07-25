@@ -34,13 +34,23 @@ class Notification extends Model {
                     }
                 }
             },
-            message: {
+            message_key: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 validate: {
                     notEmpty: {
-                        args: true,
-                        msg: 'Preencha o campo msg'
+                    args: true,
+                    msg: 'Preencha a chave da mensagem'
+                    }
+                }
+            },
+                message_variables: {
+                type: DataTypes.JSON,
+                allowNull: false,
+                validate: {
+                    notEmpty: {
+                    args: true,
+                    msg: 'Preencha os dados da mensagem'
                     }
                 }
             },
